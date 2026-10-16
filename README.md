@@ -40,6 +40,8 @@ If a command prints a version number, that tool is installed. If it says "comman
    /bin/bash -c "$(curl -fsSL https://php.new/install/mac/8.4)"
    ```
 
+   This puts `php` and `composer` in `~/.config/herd-lite/bin` and adds that folder to your `PATH` in `~/.zshrc`. It doesn't need Homebrew or Xcode. Use it instead of `brew install php`, which can fail on Macs with an older Xcode.
+
 2. **Node.js:** download the **LTS** installer from https://nodejs.org and run it.
 3. **Git:** run `xcode-select --install` and follow the prompts. If Git is already installed, this tells you so.
 4. **Close and reopen Terminal**, then run the version checks above again.
@@ -139,7 +141,8 @@ All tests should pass.
 
 | Message or problem | What to do |
 | --- | --- |
-| `php`, `composer`, `node` or `git` is "not recognized" or "command not found" | Close and reopen the terminal. If it still fails, repeat that tool's install in Step 1. |
+| `php`, `composer`, `node` or `git` is "not recognized" or "command not found" | Close and reopen the terminal. If it still fails, repeat that tool's install in Step 1. On macOS you can also run `source ~/.zshrc` instead of reopening the terminal. |
+| `brew install php` fails with `No available formula with the name "apr-util"` or a "Tier 3 configuration" warning | Homebrew doesn't support your setup, usually because Xcode is out of date. Use the php.new installer from Step 1 instead. `brew autoremove` removes the packages Homebrew left half-installed. |
 | `Your requirements could not be resolved` or a PHP extension is missing during `composer install` | Run `php -v` and check that it shows version 8.2 or newer. Then re-run the PHP installer from Step 1. |
 | `No application encryption key has been specified` | Run `php artisan key:generate`. |
 | `Vite manifest not found` | Run `npm run build`. |
