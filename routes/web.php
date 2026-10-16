@@ -19,6 +19,7 @@ Route::get('/products/{slug}', [ProductController::class, 'show'])->name('produc
 // saving and access control are added in the following steps.
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
+    Route::get('/register', [LoginController::class, 'register'])->name('register');
     Route::get('/', DashboardController::class)->name('dashboard');
     Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
     Route::get('/products/create', [AdminProductController::class, 'create'])->name('products.create');
