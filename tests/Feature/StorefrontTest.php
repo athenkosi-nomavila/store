@@ -2,32 +2,43 @@
 
 namespace Tests\Feature;
 
+use App\Models\Category;
+use App\Models\Product;
+use Database\Seeders\CatalogSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class StorefrontTest extends TestCase
 {
+    use RefreshDatabase;
+
     /**
-     * Swap in a small, known catalogue for each test.
+     * Fill the database with a small, known catalogue. Products are given
+     * in newest-first order, like config/catalog.php.
      *
      * @param  array<int, array<string, mixed>>  $products
      */
     private function useCatalog(array $products): void
     {
-        config(['catalog' => [
-            'categories' => [
-                'audio' => ['name' => 'Audio', 'description' => 'Things that make sound.'],
-                'kitchen' => ['name' => 'Kitchen', 'description' => 'Things for cooking.'],
-            ],
-            'products' => array_map(fn (array $p) => $p + [
+        $categories = [
+            'audio' => Category::factory()->create(['slug' => 'audio', 'name' => 'Audio', 'description' => 'Things that make sound.']),
+            'kitchen' => Category::factory()->create(['slug' => 'kitchen', 'name' => 'Kitchen', 'description' => 'Things for cooking.']),
+        ];
+
+        foreach (array_values($products) as $i => $p) {
+            $p += ['category' => 'audio', 'price' => 100, 'quantity' => 10, 'description' => '', 'active' => true];
+
+            Product::factory()->for($categories[$p['category']])->create([
+                'slug' => $p['slug'],
                 'sku' => 'SKU-'.$p['slug'],
-                'category' => 'audio',
-                'price' => 100,
-                'quantity' => 10,
-                'image' => null,
-                'description' => '',
-                'active' => true,
-            ], $products),
-        ]]);
+                'name' => $p['name'],
+                'price' => $p['price'],
+                'quantity' => $p['quantity'],
+                'description' => $p['description'],
+                'is_active' => $p['active'],
+                'created_at' => now()->subMinutes($i),
+            ]);
+        }
     }
 
     private function product(string $name, array $extra = []): array
@@ -60,6 +71,8 @@ class StorefrontTest extends TestCase
 
     public function test_sample_catalogue_renders(): void
     {
+        $this->seed(CatalogSeeder::class);
+
         $this->get('/')->assertOk()->assertSee('Aria Wireless Headphones');
         $this->get('/products/aria-wireless-headphones')->assertOk()->assertSee('STR-0001');
     }
@@ -110,6 +123,34 @@ class StorefrontTest extends TestCase
             ->assertSee('Desk Lamp')
             ->assertDontSee('Coffee Mug')
             ->assertSee('2 products found');
+    }
+
+    public function test_search_treats_sql_as_plain_text(): void
+    {
+        $this->useCatalog([$this->product('Speaker')]);
+
+        $this->get('/search?q='.urlencode("' OR 1=1 --"))
+            ->assertOk()
+            ->assertDontSee('Speaker')
+            ->assertSee('0 products found');
+    }
+
+    public function test_database_changes_show_on_the_storefront(): void
+    {
+        $this->useCatalog([$this->product('Speaker')]);
+
+        Product::where('slug', 'speaker')->update(['name' => 'Loud Speaker', 'price' => 349.5, 'quantity' => 0]);
+
+        $this->get('/products/speaker')
+            ->assertOk()
+            ->assertSee('Loud Speaker')
+            ->assertSee('R 349.50')
+            ->assertSee('Out of stock');
+
+        Product::where('slug', 'speaker')->update(['is_active' => false]);
+
+        $this->get('/products/speaker')->assertNotFound();
+        $this->get('/')->assertDontSee('Loud Speaker');
     }
 
     public function test_search_input_is_escaped_in_output(): void

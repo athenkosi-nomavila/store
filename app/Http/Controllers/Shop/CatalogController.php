@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\Shop;
 
 use App\Catalog\Catalog;
-use App\Catalog\Category;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductListingRequest;
-use Illuminate\Pagination\LengthAwarePaginator;
+use App\Models\Category;
 use Illuminate\View\View;
 
 /**
@@ -42,16 +41,9 @@ class CatalogController extends Controller
         $sort = $request->sort();
         $category ??= $this->catalog->category((string) $request->validated('category'));
 
-        $results = $this->catalog->find($category, $query, $sort);
-        $page = LengthAwarePaginator::resolveCurrentPage();
-
-        $products = (new LengthAwarePaginator(
-            $results->forPage($page, self::PER_PAGE)->values(),
-            $results->count(),
-            self::PER_PAGE,
-            $page,
-            ['path' => $request->url()],
-        ))->withQueryString();
+        $products = $this->catalog->find($category, $query, $sort)
+            ->paginate(self::PER_PAGE)
+            ->withQueryString();
 
         return view('shop.search', [
             'mode' => $mode,

@@ -2,100 +2,88 @@
 
 namespace App\Catalog;
 
-use Illuminate\Support\Collection;
+use App\Models\Category;
+use App\Models\Product;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
- * Read-only access to the sample catalogue in config/catalog.php.
+ * Read-only access to the storefront's products and categories.
  *
- * Every lookup returns active products only, so hidden products behave
- * exactly like missing ones.
+ * Every product lookup returns active products only, so hidden products
+ * behave exactly like missing ones. All queries go through Eloquent, which
+ * binds every value as a parameter (no SQL is built from user input).
  */
 class Catalog
 {
-    /** @var Collection<string, Category> keyed by slug */
-    private Collection $categories;
+    /** @var Collection<string, Category>|null keyed by slug */
+    private ?Collection $categories = null;
 
-    /** @var Collection<int, Product> active products, newest first */
-    private Collection $products;
-
-    public function __construct(array $data)
-    {
-        $this->categories = collect($data['categories'] ?? [])
-            ->map(fn (array $c, string $slug) => new Category($slug, $c['name'], $c['description'] ?? null))
-            ->sortBy('name')
-            ->keyBy('slug');
-
-        $this->products = collect($data['products'] ?? [])
-            ->values()
-            ->map(fn (array $p, int $i) => new Product(
-                slug: $p['slug'],
-                sku: $p['sku'],
-                name: $p['name'],
-                category: $this->categories[$p['category']],
-                price: (float) $p['price'],
-                quantity: (int) $p['quantity'],
-                image: $p['image'] ?? null,
-                description: $p['description'] ?? '',
-                is_active: $p['active'] ?? true,
-                position: $i,
-            ))
-            ->filter(fn (Product $p) => $p->is_active)
-            ->values();
-
-        foreach ($this->categories as $category) {
-            $category->products_count = $this->products->filter(fn (Product $p) => $p->category->is($category))->count();
-        }
-    }
-
-    /** @return Collection<string, Category> */
+    /**
+     * Every category, A to Z, with a count of its active products.
+     *
+     * @return Collection<string, Category>
+     */
     public function categories(): Collection
     {
-        return $this->categories;
+        return $this->categories ??= Category::query()
+            ->withCount(['products' => fn (Builder $q) => $q->active()])
+            ->orderBy('name')
+            ->get()
+            ->keyBy('slug');
     }
 
     public function category(string $slug): ?Category
     {
-        return $this->categories->get($slug);
+        return $this->categories()->get($slug);
     }
 
     public function product(string $slug): ?Product
     {
-        return $this->products->first(fn (Product $p) => $p->slug === $slug);
+        return $this->products()->where('slug', $slug)->first();
     }
 
     /** @return Collection<int, Product> */
     public function latest(int $limit): Collection
     {
-        return $this->products->take($limit);
+        return $this->products()->newest()->limit($limit)->get();
     }
 
     /** @return Collection<int, Product> */
     public function related(Product $product, int $limit): Collection
     {
-        return $this->products
-            ->filter(fn (Product $p) => $p->category->is($product->category) && $p->slug !== $product->slug)
-            ->take($limit)
-            ->values();
+        return $this->products()
+            ->where('category_id', $product->category_id)
+            ->whereKeyNot($product->getKey())
+            ->newest()
+            ->limit($limit)
+            ->get();
     }
 
     /**
      * Filter by category and search term, then sort.
      *
-     * @return Collection<int, Product>
+     * @return Builder<Product>
      */
-    public function find(?Category $category = null, string $term = '', string $sort = 'newest'): Collection
+    public function find(?Category $category = null, string $term = '', string $sort = 'newest'): Builder
     {
-        $results = $this->products
-            ->when($category, fn (Collection $c) => $c->filter(fn (Product $p) => $p->category->is($category)))
-            ->when($term !== '', fn (Collection $c) => $c->filter(fn (Product $p) => $p->matches($term)));
+        $query = $this->products()
+            ->when($category, fn (Builder $q) => $q->where('category_id', $category->getKey()))
+            ->when($term !== '', fn (Builder $q) => $q->where(fn (Builder $q) => $q
+                ->where('name', 'like', "%{$term}%")
+                ->orWhere('description', 'like', "%{$term}%")));
 
-        $sorted = match ($sort) {
-            'price_asc' => $results->sortBy([['price', 'asc'], ['position', 'asc']]),
-            'price_desc' => $results->sortBy([['price', 'desc'], ['position', 'asc']]),
-            'name' => $results->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE),
-            default => $results->sortBy('position'),
+        return match ($sort) {
+            'price_asc' => $query->orderBy('price')->newest(),
+            'price_desc' => $query->orderByDesc('price')->newest(),
+            'name' => $query->orderBy('name'),
+            default => $query->newest(),
         };
+    }
 
-        return $sorted->values();
+    /** @return Builder<Product> */
+    private function products(): Builder
+    {
+        return Product::query()->active()->with('category');
     }
 }

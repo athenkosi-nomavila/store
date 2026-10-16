@@ -11,7 +11,7 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton(Catalog::class, fn ($app) => new Catalog($app['config']->get('catalog', [])));
+        $this->app->scoped(Catalog::class);
     }
 
     public function boot(): void
