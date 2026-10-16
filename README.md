@@ -4,7 +4,7 @@ How to install, configure and run the Store application on your own computer.
 
 ## Step 1: Install the tools
 
-You need four tools: **PHP** (8.2 or newer), **Composer**, **Node.js** (18 or newer) and **Git**. If you already have them, skip to [Step 2](#step-2-download-the-project).
+You need five tools: **PHP** (8.2 or newer), **Composer**, **Node.js** (18 or newer), **Git** and **MySQL** (8.0 or newer). If you already have them, skip to [Step 2](#step-2-download-the-project).
 
 To check what you already have, open a terminal and run:
 
@@ -13,6 +13,7 @@ php -v
 composer --version
 node -v
 git --version
+mysql --version
 ```
 
 If a command prints a version number, that tool is installed. If it says "command not found" or "not recognized", install it using the instructions for your system below.
@@ -30,7 +31,8 @@ If a command prints a version number, that tool is installed. If it says "comman
    This is Laravel's official installer. It installs PHP 8.4 and Composer.
 2. **Node.js:** download the **LTS** installer from https://nodejs.org and run it. Keep the default options.
 3. **Git:** download the installer from https://git-scm.com/download/win and run it. Keep the default options.
-4. **Close and reopen PowerShell** so it picks up the new tools, then run the version checks above again.
+4. **MySQL:** download the **MySQL Installer** from https://dev.mysql.com/downloads/installer/ and run it. Choose the *Server only* setup, and when it asks, pick a password for the `root` user and write it down.
+5. **Close and reopen PowerShell** so it picks up the new tools, then run the version checks above again.
 
 ### macOS
 
@@ -44,7 +46,8 @@ If a command prints a version number, that tool is installed. If it says "comman
 
 2. **Node.js:** download the **LTS** installer from https://nodejs.org and run it.
 3. **Git:** run `xcode-select --install` and follow the prompts. If Git is already installed, this tells you so.
-4. **Close and reopen Terminal**, then run the version checks above again.
+4. **MySQL:** download the **macOS DMG Archive** from https://dev.mysql.com/downloads/mysql/ (choose *ARM* for Apple silicon Macs, *x86* for Intel Macs) and run it. When it asks, pick a password for the `root` user and write it down. The `mysql` command is installed at `/usr/local/mysql/bin/mysql`.
+5. **Close and reopen Terminal**, then run the version checks above again.
 
 ### Linux (Ubuntu or Debian)
 
@@ -62,7 +65,14 @@ If a command prints a version number, that tool is installed. If it says "comman
    ```
 
    Then run `node -v`. If the version is below 18, install the LTS version from https://nodejs.org instead.
-3. **Close and reopen the terminal**, then run the version checks above again.
+3. **MySQL:**
+
+   ```bash
+   sudo apt install -y mysql-server
+   ```
+
+   On Debian, use `sudo apt install -y mariadb-server` instead. It works the same way.
+4. **Close and reopen the terminal**, then run the version checks above again.
 
 ## Step 2: Download the project
 
@@ -100,7 +110,36 @@ npm install
    php artisan key:generate
    ```
 
-The default settings work on your own computer, so you don't need to change anything else. These are the settings in `.env` you might want to change later:
+3. Create the database and a user for the app. Open the MySQL prompt:
+
+   - **Windows:** open **MySQL Command Line Client** from the Start menu and type your `root` password.
+   - **macOS:** run `/usr/local/mysql/bin/mysql -u root -p` and type your `root` password.
+   - **Linux:** run `sudo mysql`.
+
+   Then paste these lines, replacing `choose-a-password` with a password of your own:
+
+   ```sql
+   CREATE DATABASE store CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   CREATE USER 'store'@'localhost' IDENTIFIED BY 'choose-a-password';
+   GRANT ALL PRIVILEGES ON store.* TO 'store'@'localhost';
+   EXIT;
+   ```
+
+4. Open `.env` in a text editor and put the same password after `DB_PASSWORD=`:
+
+   ```
+   DB_PASSWORD=choose-a-password
+   ```
+
+5. Create the tables and load the sample products:
+
+   ```bash
+   php artisan migrate --seed
+   ```
+
+   To wipe the database and start again with the sample products, run `php artisan migrate:fresh --seed`.
+
+The other default settings work on your own computer. These are the settings in `.env` you might want to change later:
 
 | Setting | Default | What it does |
 | --- | --- | --- |
@@ -108,8 +147,9 @@ The default settings work on your own computer, so you don't need to change anyt
 | `APP_URL` | `http://localhost` | The address the site runs on |
 | `APP_TIMEZONE` | `Africa/Johannesburg` | The time zone used for dates |
 | `APP_DEBUG` | `true` | Shows detailed error pages. Set it to `false` on a live server |
+| `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | `store`, `store`, empty | The MySQL database the app uses, and the user and password it logs in with |
 
-Keep `.env` private. It contains your secret key, and Git is already set up to ignore it.
+Keep `.env` private. It contains your secret key and database password, and Git is already set up to ignore it.
 
 ## Step 5: Build the styles
 
@@ -135,7 +175,7 @@ The next time you want to run the site, just open a terminal in the `store` fold
 php artisan test
 ```
 
-All tests should pass.
+All tests should pass. The tests use a temporary in-memory database, so they never touch your MySQL data.
 
 ## If something goes wrong
 
@@ -144,6 +184,9 @@ All tests should pass.
 | `php`, `composer`, `node` or `git` is "not recognized" or "command not found" | Close and reopen the terminal. If it still fails, repeat that tool's install in Step 1. On macOS you can also run `source ~/.zshrc` instead of reopening the terminal. |
 | `brew install php` fails with `No available formula with the name "apr-util"` or a "Tier 3 configuration" warning | Homebrew doesn't support your setup, usually because Xcode is out of date. Use the php.new installer from Step 1 instead. `brew autoremove` removes the packages Homebrew left half-installed. |
 | `Your requirements could not be resolved` or a PHP extension is missing during `composer install` | Run `php -v` and check that it shows version 8.2 or newer. Then re-run the PHP installer from Step 1. |
+| `SQLSTATE[HY000] [1045] Access denied for user 'store'@'localhost'` | The password in `.env` doesn't match the one you chose in Step 4. Fix `DB_PASSWORD` and try again. |
+| `SQLSTATE[HY000] [2002] Connection refused` | MySQL isn't running. On Windows, start it from the Services app. On macOS, start it in System Settings > MySQL. On Linux, run `sudo service mysql start`. |
+| `could not find driver` | Your PHP is missing the MySQL extension. Re-run the PHP installer from Step 1. |
 | `No application encryption key has been specified` | Run `php artisan key:generate`. |
 | `Vite manifest not found` | Run `npm run build`. |
 | The page shows but has no styling | Run `npm run build`, then refresh the browser with `Ctrl+Shift+R` (`Cmd+Shift+R` on macOS). |
