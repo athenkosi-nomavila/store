@@ -32,9 +32,9 @@
             @yield('content')
         </div>
 
-        <p class="mt-6 text-center text-sm text-zinc-400">
-            <a href="{{ route('home') }}" class="hover:text-white">&larr; Back to the store</a>
-        </p>
+        @hasSection('back')
+            <p class="mt-6 text-center text-sm text-zinc-400">@yield('back')</p>
+        @endif
     </main>
 </body>
 </html>

@@ -2,6 +2,10 @@
 
 @section('title', 'Create an account')
 
+@section('back')
+    <a href="{{ route('admin.login') }}" class="hover:text-white">&larr; Back to login</a>
+@endsection
+
 @section('content')
     <h1 class="text-xl font-bold">Create an account</h1>
     <p class="mt-1 text-sm text-zinc-500">An admin needs to approve your account before you can use the dashboard. The very first account becomes the admin.</p>
