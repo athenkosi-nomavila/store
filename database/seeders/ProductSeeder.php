@@ -50,7 +50,7 @@ class ProductSeeder extends Seeder
                 [
                     'category_id' => $categories[$slug],
                     'name' => $name,
-                    'sku' => sprintf('LUM-%04d', $i + 1),
+                    'sku' => sprintf('STR-%04d', $i + 1),
                     'description' => $description,
                     'price' => $price,
                     'quantity' => $quantity,

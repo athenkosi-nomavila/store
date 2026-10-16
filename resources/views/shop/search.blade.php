@@ -42,56 +42,40 @@
             </p>
         </header>
 
-        <form class="toolbar" action="{{ $formAction }}" method="GET" data-filters>
+        <form class="toolbar" action="{{ $formAction }}" method="GET">
             @if ($mode === 'search')
                 <input type="hidden" name="q" value="{{ $query }}">
             @endif
-
-            <button type="button" class="btn btn-outline filter-toggle" aria-expanded="false" aria-controls="filter-panel" data-filter-toggle>
-                <x-icon name="filter" size="18" /> Filter and sort
-            </button>
-
-            <div class="filter-panel" id="filter-panel">
-                <div class="field">
-                    <label for="filter-category">Category</label>
-                    <select id="filter-category" name="category" data-auto-submit>
-                        <option value="">All categories</option>
-                        @foreach ($navCategories as $navCategory)
-                            <option value="{{ $navCategory->slug }}" @selected($activeCategory?->is($navCategory))>{{ $navCategory->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="field">
-                    <label for="filter-sort">Sort by</label>
-                    <select id="filter-sort" name="sort" data-auto-submit>
-                        @foreach ($sorts as $value => $label)
-                            <option value="{{ $value }}" @selected($sort === $value)>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary filter-apply">Apply</button>
+            <div class="field">
+                <label for="filter-category">Category</label>
+                <select id="filter-category" name="category">
+                    <option value="">All categories</option>
+                    @foreach ($navCategories as $navCategory)
+                        <option value="{{ $navCategory->slug }}" @selected($activeCategory?->is($navCategory))>{{ $navCategory->name }}</option>
+                    @endforeach
+                </select>
             </div>
+            <div class="field">
+                <label for="filter-sort">Sort by</label>
+                <select id="filter-sort" name="sort">
+                    @foreach ($sorts as $value => $label)
+                        <option value="{{ $value }}" @selected($sort === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Apply</button>
         </form>
 
         @if ($products->isEmpty())
             <div class="empty-state">
-                <span class="empty-state-icon"><x-icon name="search" size="40" /></span>
                 @if ($query !== '')
                     <h2>No products match "{{ $query }}"</h2>
-                    <ul class="empty-tips">
-                        <li>Check the spelling</li>
-                        <li>Try a broader or different term</li>
-                        <li>Browse one of our popular categories</li>
-                    </ul>
+                    <p>Check the spelling or try a broader term.</p>
                 @else
                     <h2>Nothing here yet</h2>
                     <p>There are no products in this selection right now.</p>
                 @endif
-                <ul class="chip-list">
-                    @foreach ($navCategories as $navCategory)
-                        <li><a href="{{ route('shop.category', $navCategory) }}" class="chip">{{ $navCategory->name }}</a></li>
-                    @endforeach
-                </ul>
+                <a href="{{ route('shop.index') }}" class="btn btn-primary">Browse all products</a>
             </div>
         @else
             <div class="product-grid">

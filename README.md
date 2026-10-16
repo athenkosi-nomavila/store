@@ -10,7 +10,7 @@ A small Laravel 11 + MySQL e-commerce site with a responsive storefront. The adm
 - Composer 2
 - MySQL 8 (or MariaDB 10.6+)
 
-No Node build step is needed: the storefront uses plain CSS and JavaScript in `public/`.
+No Node build step is needed: the storefront is plain HTML and CSS, with no JavaScript.
 
 ## Install and run
 
@@ -59,29 +59,27 @@ php artisan test
 
 | URL | What it shows |
 | --- | --- |
-| `/` | Hero banner, trust strip, category tiles, the 8 latest products, promo panels |
+| `/` | Promotional banner, category tiles, the 8 latest products |
 | `/shop` | All active products, with sort, category filter and pagination (12 per page) |
 | `/search?q=...` | Products whose name or description matches the term |
 | `/category/{slug}` | Products in one category |
-| `/products/{slug}` | Product details, stock status, quantity selector, related products |
-| `/about`, `/contact` | Static pages |
+| `/products/{slug}` | Product details, stock status, more products from the same category |
 
-Only products marked active are shown, and stock status comes from quantity: more than 5 is "In stock", 1 to 5 is "Only N left", 0 is "Out of stock" with buying disabled.
+Only products marked active are shown, and stock status comes from quantity: more than 5 is "In stock", 1 to 5 is "Only N left", 0 is "Out of stock".
 
 ## Project structure
 
 ```
-app/Http/Controllers/Shop/     Home, catalogue (shop/search/category), product, newsletter
+app/Http/Controllers/Shop/     Home, catalogue (shop/search/category), product
 app/Http/Requests/             ProductListingRequest: validates q, sort, category, page
 app/Http/Middleware/           SecurityHeaders: CSP and other browser protections
 app/Models/                    Category hasMany Product; Product belongsTo Category
 database/migrations/           users, categories, products (foreign key category_id)
 database/seeders/              5 categories, 14 products (13 active) with images
-resources/views/layouts/       app.blade.php: header, mobile drawer, footer
+resources/views/layouts/       app.blade.php: header with search and category menu, footer
 resources/views/shop/          home, product, search (also used for /shop and categories)
 resources/views/components/    product-card, availability-badge, product-image, icon, logo
 public/css/app.css             All styles; brand tokens on :root
-public/js/app.js               Drawer, dropdown, carousel, filters, quantity selector
 tests/                         Feature tests for pages, search and security; unit tests for stock rules
 ```
 
@@ -94,11 +92,10 @@ tests/                         Feature tests for pages, search and security; uni
 ## Security in the storefront
 
 - **SQL injection.** All queries go through Eloquent. The search term is only ever a bound parameter (`whereRaw("name LIKE ? ESCAPE '!'", [$like])`), and `%` and `_` typed by a visitor are escaped so they match literally.
-- **XSS.** Every value is printed with Blade's escaped `{{ }}`, including the search term echoed back. There is no `{!! !!}` in the views. A Content Security Policy allows scripts only from this site, and there are no inline scripts or `onclick` handlers.
-- **CSRF.** The only form that posts (newsletter) carries `@csrf`; Laravel rejects posts without a valid token with a 419.
+- **XSS.** Every value is printed with Blade's escaped `{{ }}`, including the search term echoed back. There is no `{!! !!}` in the views. A Content Security Policy blocks all inline scripts and any script from another site.
+- **CSRF.** The storefront has no forms that change data (search is a read-only GET). Laravel's CSRF middleware is on for every web route and will protect the admin forms.
 - **Input validation.** Listing parameters are validated by `ProductListingRequest`: the search term is a string of at most 100 characters, sort must be one of four known values, and the category must exist.
 - **Hidden data.** Inactive products return 404, the same as missing ones.
-- **Abuse.** The newsletter endpoint is rate limited to 5 requests a minute.
 - **Headers.** `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy` and `Permissions-Policy` are set on every page.
 - **Credentials.** Secrets live only in `.env`, which is git-ignored; `.env.example` holds placeholders.
 
@@ -107,4 +104,4 @@ tests/                         Feature tests for pages, search and security; uni
 | Desktop | Mobile |
 | --- | --- |
 | ![Homepage, desktop](docs/screenshots/home-desktop.png) | ![Homepage, mobile](docs/screenshots/home-mobile.png) |
-| ![Product page, desktop](docs/screenshots/product-desktop.png) | ![Menu drawer, mobile](docs/screenshots/drawer-mobile.png) |
+| ![Product page, desktop](docs/screenshots/product-desktop.png) | ![Search with no results, mobile](docs/screenshots/noresults-mobile.png) |

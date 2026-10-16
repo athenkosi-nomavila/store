@@ -52,14 +52,13 @@ class StorefrontTest extends TestCase
         $this->get('/products/does-not-exist')->assertNotFound()->assertSee('find that page');
     }
 
-    public function test_out_of_stock_product_disables_buying(): void
+    public function test_out_of_stock_product_is_labelled(): void
     {
         $product = Product::factory()->outOfStock()->create();
 
         $this->get(route('products.show', $product))
             ->assertOk()
-            ->assertSee('Out of stock')
-            ->assertSee('disabled', false);
+            ->assertSee('Out of stock');
     }
 
     public function test_search_matches_name_and_description(): void
@@ -151,19 +150,5 @@ class StorefrontTest extends TestCase
             ->assertHeader('X-Content-Type-Options', 'nosniff')
             ->assertHeader('X-Frame-Options', 'DENY')
             ->assertHeader('Content-Security-Policy');
-    }
-
-    public function test_newsletter_rejects_missing_csrf_token(): void
-    {
-        // Laravel skips the CSRF check while running tests, so turn it back on here.
-        $this->app['env'] = 'local';
-
-        $this->post('/newsletter', ['email' => 'a@example.com'])->assertStatus(419);
-    }
-
-    public function test_newsletter_validates_email(): void
-    {
-        $this->post('/newsletter', ['email' => 'not-an-email'])->assertSessionHasErrors('email');
-        $this->post('/newsletter', ['email' => 'a@example.com'])->assertSessionHas('status');
     }
 }
