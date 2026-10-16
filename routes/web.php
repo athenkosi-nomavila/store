@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\LoginController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Shop\CatalogController;
 use App\Http\Controllers\Shop\HomeController;
 use App\Http\Controllers\Shop\ProductController;
@@ -11,3 +14,13 @@ Route::get('/shop', [CatalogController::class, 'index'])->name('shop.index');
 Route::get('/search', [CatalogController::class, 'search'])->name('shop.search');
 Route::get('/category/{slug}', [CatalogController::class, 'category'])->name('shop.category');
 Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
+
+// Admin area, separate from the storefront. Screens only for now: login,
+// saving and access control are added in the following steps.
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/login', [LoginController::class, 'create'])->name('login');
+    Route::get('/', DashboardController::class)->name('dashboard');
+    Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
+    Route::get('/products/create', [AdminProductController::class, 'create'])->name('products.create');
+    Route::get('/products/{product:id}/edit', [AdminProductController::class, 'edit'])->whereNumber('product')->name('products.edit');
+});
