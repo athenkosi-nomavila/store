@@ -4,9 +4,9 @@
 
 @section('content')
     <h1 class="text-xl font-bold">Create an account</h1>
-    <p class="mt-1 text-sm text-zinc-500">An existing admin needs to approve your account before you can use the dashboard.</p>
+    <p class="mt-1 text-sm text-zinc-500">An admin needs to approve your account before you can use the dashboard. The very first account becomes the admin.</p>
 
-    <form method="POST" class="mt-6 space-y-4">
+    <form method="POST" action="{{ route('admin.register') }}" class="mt-6 space-y-4">
         @csrf
 
         @foreach ([
@@ -27,8 +27,7 @@
             </div>
         @endforeach
 
-        {{-- Creating accounts is wired up in the login step. --}}
-        <button type="submit" disabled
+        <button type="submit"
                 class="h-11 w-full rounded-full bg-brand-600 font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60">
             Create account
         </button>

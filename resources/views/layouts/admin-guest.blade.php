@@ -17,6 +17,18 @@
         <div class="mb-8 flex justify-center text-zinc-300"><x-admin.brand /></div>
 
         <div class="rounded-2xl bg-white p-6 shadow-xl sm:p-8">
+            @if (session('status'))
+                <p class="mb-6 rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-700" role="status">{{ session('status') }}</p>
+            @endif
+
+            @if ($errors->any())
+                <div class="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+                    @foreach ($errors->all() as $error)
+                        <p>{{ $error }}</p>
+                    @endforeach
+                </div>
+            @endif
+
             @yield('content')
         </div>
 

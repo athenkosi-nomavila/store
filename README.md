@@ -167,6 +167,10 @@ php artisan serve
 
 Open **http://127.0.0.1:8000** in your browser. Leave the terminal open while you use the site, and press `Ctrl+C` there to stop the server.
 
+### Create the admin account
+
+Open **http://127.0.0.1:8000/admin/register** and sign up. The first account becomes the store admin and is logged straight in. Anyone who signs up after that has to wait until an admin approves them on the **Users** page of the admin.
+
 The next time you want to run the site, just open a terminal in the `store` folder and run `php artisan serve`.
 
 ### Optional: run the tests

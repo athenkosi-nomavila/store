@@ -28,6 +28,7 @@
                 @foreach ([
                     ['Dashboard', 'grid', route('admin.dashboard'), request()->routeIs('admin.dashboard')],
                     ['Products', 'box', route('admin.products.index'), request()->routeIs('admin.products.*')],
+                    ['Users', 'users', route('admin.users.index'), request()->routeIs('admin.users.*')],
                 ] as [$label, $icon, $url, $active])
                     <li>
                         <a href="{{ $url }}" @if ($active) aria-current="page" @endif @class([
@@ -40,7 +41,10 @@
             </ul>
         </nav>
 
-        <div class="hidden border-t border-white/10 p-3 lg:block"><x-admin.account-actions stacked /></div>
+        <div class="hidden border-t border-white/10 p-3 lg:block">
+            <p class="truncate px-3 pb-2 text-xs text-zinc-500">Logged in as <span class="text-zinc-300">{{ auth()->user()->name }}</span></p>
+            <x-admin.account-actions stacked />
+        </div>
     </aside>
 
     <div class="min-w-0 flex-1">
@@ -49,6 +53,10 @@
                 <h1 class="text-2xl font-bold">@yield('title')</h1>
                 @yield('actions')
             </div>
+
+            @if (session('status'))
+                <p class="mb-6 rounded-lg bg-brand-50 px-4 py-3 text-brand-700" role="status">{{ session('status') }}</p>
+            @endif
 
             @if ($errors->any())
                 <div class="mb-6 rounded-lg bg-red-50 px-4 py-3 text-red-700" role="alert">

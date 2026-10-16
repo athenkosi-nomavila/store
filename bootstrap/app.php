@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\SecurityHeaders;
 use App\Support\DatabaseOutage;
 use Illuminate\Database\QueryException;
@@ -19,6 +20,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             SecurityHeaders::class,
         ]);
+
+        $middleware->alias(['admin' => EnsureUserIsAdmin::class]);
+
+        // The only login page is the admin one.
+        $middleware->redirectGuestsTo(fn () => route('admin.login'));
+        $middleware->redirectUsersTo(fn () => route('admin.dashboard'));
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // A lost database connection is an outage, not a bug, so even in

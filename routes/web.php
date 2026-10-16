@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\RegisterController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Shop\CatalogController;
 use App\Http\Controllers\Shop\HomeController;
 use App\Http\Controllers\Shop\ProductController;
@@ -15,13 +17,26 @@ Route::get('/search', [CatalogController::class, 'search'])->name('shop.search')
 Route::get('/category/{slug}', [CatalogController::class, 'category'])->name('shop.category');
 Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
 
-// Admin area, separate from the storefront. Screens only for now: login,
-// saving and access control are added in the following steps.
+// Admin area, separate from the storefront.
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/login', [LoginController::class, 'create'])->name('login');
-    Route::get('/register', [LoginController::class, 'register'])->name('register');
-    Route::get('/', DashboardController::class)->name('dashboard');
-    Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
-    Route::get('/products/create', [AdminProductController::class, 'create'])->name('products.create');
-    Route::get('/products/{product:id}/edit', [AdminProductController::class, 'edit'])->whereNumber('product')->name('products.edit');
+    // Login and sign-up, for visitors who are not logged in. Posting is
+    // rate limited per IP on top of the per-email login limit.
+    Route::middleware('guest')->group(function () {
+        Route::get('/login', [LoginController::class, 'create'])->name('login');
+        Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:10,1');
+        Route::get('/register', [RegisterController::class, 'create'])->name('register');
+        Route::post('/register', [RegisterController::class, 'store'])->middleware('throttle:5,1');
+    });
+
+    // Everything else needs a logged-in, approved admin.
+    Route::middleware(['auth', 'admin'])->group(function () {
+        Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+        Route::get('/', DashboardController::class)->name('dashboard');
+        Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
+        Route::get('/products/create', [AdminProductController::class, 'create'])->name('products.create');
+        Route::get('/products/{product:id}/edit', [AdminProductController::class, 'edit'])->whereNumber('product')->name('products.edit');
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::patch('/users/{user}/approve', [UserController::class, 'approve'])->whereNumber('user')->name('users.approve');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->whereNumber('user')->name('users.destroy');
+    });
 });
