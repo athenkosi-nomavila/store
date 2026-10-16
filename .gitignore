@@ -21,3 +21,6 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Product pictures uploaded through the admin
+/public/images/products/upload-*

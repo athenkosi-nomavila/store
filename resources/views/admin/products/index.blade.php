@@ -60,11 +60,10 @@
                                        class="flex h-10 w-10 items-center justify-center rounded-full text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
                                         <x-icon name="pencil" size="18" /><span class="sr-only">Edit {{ $product->name }}</span>
                                     </a>
-                                    {{-- Deleting is wired up in the product management step. --}}
-                                    <button type="button" disabled title="Delete"
-                                            class="flex h-10 w-10 items-center justify-center rounded-full text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50">
+                                    <a href="{{ route('admin.products.delete', $product) }}" title="Delete"
+                                       class="flex h-10 w-10 items-center justify-center rounded-full text-red-600 hover:bg-red-50">
                                         <x-icon name="trash" size="18" /><span class="sr-only">Delete {{ $product->name }}</span>
-                                    </button>
+                                    </a>
                                 </div>
                             </td>
                         </tr>

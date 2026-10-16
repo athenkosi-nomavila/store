@@ -47,6 +47,16 @@ return [
             'report' => false,
         ],
 
+        // Product pictures, seeded and uploaded, served from public/images/products.
+        'product_images' => [
+            'driver' => 'local',
+            'root' => public_path('images/products'),
+            'url' => '/images/products',
+            'visibility' => 'public',
+            'throw' => true,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
