@@ -22,7 +22,7 @@ class AdminScreensTest extends TestCase
     {
         $this->get('/admin/login')
             ->assertOk()
-            ->assertSee('Log in to the admin')
+            ->assertSee('Welcome back')
             ->assertSee('name="_token"', false)
             ->assertDontSee('site-search', false);
     }
