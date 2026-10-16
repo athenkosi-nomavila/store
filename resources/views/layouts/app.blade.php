@@ -114,7 +114,7 @@
         <div class="container footer-grid">
             <div class="footer-brand">
                 <x-logo class="logo-light" />
-                <p>Everyday essentials, thoughtfully chosen. Lumora brings together audio, home and lifestyle goods we would happily use ourselves.</p>
+                <p>Everyday essentials, thoughtfully chosen. Store brings together audio, home and lifestyle goods we would happily use ourselves.</p>
             </div>
             <div>
                 <h2 class="footer-heading">Shop</h2>
@@ -131,7 +131,7 @@
                     <li><a href="{{ route('contact') }}">Contact us</a></li>
                     <li><a href="{{ route('about') }}#delivery">Delivery</a></li>
                     <li><a href="{{ route('about') }}#returns">Returns</a></li>
-                    <li><a href="{{ route('about') }}">About Lumora</a></li>
+                    <li><a href="{{ route('about') }}">About Store</a></li>
                 </ul>
             </div>
             <div>

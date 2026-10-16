@@ -1,4 +1,4 @@
-# Lumora store
+# Store
 
 A small Laravel 11 + MySQL e-commerce site with a responsive storefront. The admin dashboard (login, statistics, product management) is being built separately and will be added to this README when it lands.
 
@@ -25,17 +25,17 @@ php artisan key:generate
 Create a database and a user for it, then put the credentials in `.env`:
 
 ```sql
-CREATE DATABASE lumora CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'lumora'@'localhost' IDENTIFIED BY 'choose-a-strong-password';
-GRANT ALL PRIVILEGES ON lumora.* TO 'lumora'@'localhost';
+CREATE DATABASE store CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'store'@'localhost' IDENTIFIED BY 'choose-a-strong-password';
+GRANT ALL PRIVILEGES ON store.* TO 'store'@'localhost';
 ```
 
 ```dotenv
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=lumora
-DB_USERNAME=lumora
+DB_DATABASE=store
+DB_USERNAME=store
 DB_PASSWORD=choose-a-strong-password
 ```
 

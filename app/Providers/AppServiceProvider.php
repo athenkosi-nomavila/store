@@ -20,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
         // Catch N+1 queries and silently dropped attributes while developing.
         Model::shouldBeStrict(! $this->app->isProduction());
 
-        Paginator::defaultView('vendor.pagination.lumora');
+        Paginator::defaultView('vendor.pagination.store');
 
         // The header menu, footer and listing filters all list categories;
         // load them once per request.

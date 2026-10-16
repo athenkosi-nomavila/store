@@ -1,5 +1,5 @@
 /*
- * Lumora storefront behaviour: mobile drawer, categories dropdown, hero
+ * Storefront behaviour: mobile drawer, categories dropdown, hero
  * carousel, listing filters and the quantity selector.
  * No inline handlers anywhere, so a strict Content Security Policy applies.
  */
@@ -205,7 +205,7 @@
 
     function readCart() {
         try {
-            return Math.max(0, parseInt(window.localStorage.getItem('lumora-cart-count'), 10) || 0);
+            return Math.max(0, parseInt(window.localStorage.getItem('store-cart-count'), 10) || 0);
         } catch (e) {
             return 0;
         }
@@ -232,7 +232,7 @@
             const qty = Number(form.querySelector('input[name="quantity"]').value) || 1;
             const count = readCart() + qty;
             try {
-                window.localStorage.setItem('lumora-cart-count', String(count));
+                window.localStorage.setItem('store-cart-count', String(count));
             } catch (e) { /* storage unavailable: still update the badge */ }
             renderCart(count);
 
