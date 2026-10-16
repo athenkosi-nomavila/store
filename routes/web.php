@@ -34,7 +34,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', DashboardController::class)->name('dashboard');
         Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
         Route::get('/products/create', [AdminProductController::class, 'create'])->name('products.create');
+        Route::post('/products', [AdminProductController::class, 'store'])->name('products.store');
         Route::get('/products/{product:id}/edit', [AdminProductController::class, 'edit'])->whereNumber('product')->name('products.edit');
+        Route::put('/products/{product:id}', [AdminProductController::class, 'update'])->whereNumber('product')->name('products.update');
+        Route::get('/products/{product:id}/delete', [AdminProductController::class, 'confirmDelete'])->whereNumber('product')->name('products.delete');
+        Route::delete('/products/{product:id}', [AdminProductController::class, 'destroy'])->whereNumber('product')->name('products.destroy');
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::patch('/users/{user}/approve', [UserController::class, 'approve'])->whereNumber('user')->name('users.approve');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->whereNumber('user')->name('users.destroy');
