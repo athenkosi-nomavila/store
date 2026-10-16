@@ -1,85 +1,129 @@
 # Store
 
-A small Laravel 11 e-commerce site. This first part is the customer-facing storefront. It reads a sample catalogue from `config/catalog.php`, so it needs no database yet. The MySQL tables and the admin dashboard (login, statistics, product management) come in a later change, and this README will be updated then.
+A small online shop built with Laravel 11 and Tailwind CSS. This version contains the customer-facing storefront: a homepage, product pages, category pages and search. Products currently come from a sample catalogue file, so no database is needed yet.
 
 ![Homepage on desktop](docs/screenshots/home-desktop.png)
 
-## Requirements
+## 1. Requirements
 
-- PHP 8.2 or newer with the `mbstring` extension
-- Composer 2
-- Node.js 18 or newer (only to build the Tailwind CSS)
+Install these before you start. The commands in brackets show how to check each one.
 
-No database is needed. The pages are styled with [Tailwind CSS](https://tailwindcss.com) and use no JavaScript in the browser.
+| Tool | Version | Check |
+| --- | --- | --- |
+| PHP | 8.2 or newer, with the `mbstring`, `openssl` and `fileinfo` extensions | `php -v` |
+| Composer | 2.x | `composer --version` |
+| Node.js and npm | Node 18 or newer | `node -v` and `npm -v` |
+| Git | any recent version | `git --version` |
 
-## Install and run
+## 2. Install
+
+Run these commands in a terminal, one after another.
 
 ```bash
+# Download the code
 git clone https://github.com/athenkosi-nomavila/store.git
 cd store
+
+# Install the PHP packages
 composer install
+
+# Install the packages used to build the styles
+npm install
+```
+
+## 3. Configure
+
+Create your own settings file from the example and give the app a secret key:
+
+```bash
 cp .env.example .env
 php artisan key:generate
-npm install
+```
+
+On Windows Command Prompt, use `copy .env.example .env` instead of `cp`.
+
+The defaults in `.env` work as they are for running the site on your own computer. These are the settings you might change:
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `APP_NAME` | `Store` | The shop name shown in the header, footer and browser tab |
+| `APP_ENV` | `local` | Set to `production` on a live server |
+| `APP_DEBUG` | `true` | Shows detailed error pages. **Set to `false` on a live server** |
+| `APP_URL` | `http://localhost` | The address the site is served from |
+| `APP_TIMEZONE` | `Africa/Johannesburg` | Time zone for dates |
+
+The `DB_` settings are not used yet. They are there for when the database is added.
+
+**Never commit `.env`.** It holds your app key and, later, your database password. Git already ignores it.
+
+### Changing the products
+
+The sample products and categories are in `config/catalog.php`. Product images go in `public/images/products/`. Each product lists its image by file name, for example `'image' => 'speaker.jpg'`. If you edit this file while `config:cache` is active, run `php artisan config:clear` to see the change.
+
+## 4. Run
+
+Build the styles, then start the server:
+
+```bash
 npm run build
 php artisan serve
 ```
 
-While changing styles, run `npm run dev` in a second terminal instead of `npm run build` so the page updates as you save.
+Open **http://127.0.0.1:8000** in your browser. Press `Ctrl+C` in the terminal to stop the server.
 
-Open http://127.0.0.1:8000.
+### Working on the styles
 
-To run the tests:
+If you are changing the look of the site, run the style watcher in a second terminal instead of `npm run build`:
+
+```bash
+npm run dev
+```
+
+The page then updates each time you save a view or `resources/css/app.css`. Stop it with `Ctrl+C` and run `npm run build` again when you are done.
+
+### Viewing the site on your phone
+
+Start the server so other devices on your Wi-Fi can reach it:
+
+```bash
+php artisan serve --host=0.0.0.0
+```
+
+Then open `http://<your computer's IP address>:8000` on the phone.
+
+## 5. Run the tests
 
 ```bash
 php artisan test
 ```
 
-## What is in the storefront
+All tests should pass. They do not need a database or a build of the styles.
 
-| URL | What it shows |
+## Troubleshooting
+
+| Problem | Fix |
 | --- | --- |
-| `/` | Promotional banner, category tiles, the 8 latest products |
-| `/shop` | All active products, with sort, category filter and pagination (12 per page) |
-| `/search?q=...` | Products whose name or description contains the term |
+| `Vite manifest not found` | Run `npm run build` (or keep `npm run dev` running). |
+| `No application encryption key has been specified` | Run `php artisan key:generate`. |
+| The page has no styling | Run `npm run build`. Then refresh with `Ctrl+Shift+R`. |
+| `Address already in use` | Another program is using port 8000. Run `php artisan serve --port=8001` and open that port instead. |
+| Changes to `config/catalog.php` don't show | Run `php artisan config:clear`. |
+| `composer install` reports a missing PHP extension | Enable that extension in your `php.ini`, then run `composer install` again. |
+
+## Pages
+
+| Address | What it shows |
+| --- | --- |
+| `/` | Promotional banner, categories and the 8 newest products |
+| `/shop` | All products, with a category filter, sorting and 12 products per page |
+| `/search?q=...` | Products whose name or description contains the search term |
 | `/category/{slug}` | Products in one category |
-| `/products/{slug}` | Product details, stock status, more products from the same category |
+| `/products/{slug}` | One product's details and stock status, plus more from the same category |
 
-Only products marked active are shown. Stock status comes from quantity: more than 5 is "In stock", 1 to 5 is "Only N left" and 0 is "Out of stock".
+## Security
 
-To change the products, edit `config/catalog.php` and put images in `public/images/products/`.
-
-## Project structure
-
-```
-config/catalog.php             Sample categories and products (13 active, 1 hidden)
-app/Catalog/                   Catalog (lookups, search, sort), Product and Category
-app/Http/Controllers/Shop/     Home, catalogue (shop/search/category), product
-app/Http/Requests/             ProductListingRequest: validates q, sort, category, page
-app/Http/Middleware/           SecurityHeaders: CSP and other browser protections
-resources/views/layouts/       app.blade.php: header with search and category menu, footer
-resources/views/shop/          home, product, search (also used for /shop and categories)
-resources/views/components/    product-card, product-grid, availability-badge, product-image, breadcrumb, icon, logo
-resources/css/app.css          Tailwind entry point; brand colours and font in @theme
-public/images/products/        Product images
-tests/                         Feature tests for pages, search and security; unit tests for stock rules
-```
-
-When the database is added, only `app/Catalog/Catalog.php` needs to be replaced with Eloquent queries. The views and controllers already work with `Product` and `Category` objects.
-
-## Security in the storefront
-
-- **XSS.** Every value is printed with Blade's escaped `{{ }}`, including the search term shown back on the results page. The views have no `{!! !!}`. A Content Security Policy blocks inline scripts and scripts from other sites.
-- **Input validation.** `ProductListingRequest` validates the listing parameters. The search term must be a string of at most 100 characters, sort must be one of four known values, and the category must exist.
-- **Hidden data.** Inactive products return a 404, the same as missing ones.
-- **Image paths.** Image URLs are built only from file names in the catalogue, with `basename()`, so a bad entry cannot point outside `public/images/products/`.
-- **CSRF.** The storefront has no forms that change data, because search is a read-only GET. Laravel's CSRF middleware is on for every web route and will protect the admin forms.
-- **Headers.** Every page sends `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy` and `Permissions-Policy`.
-- **Credentials.** Secrets live only in `.env`, which git ignores. `.env.example` holds placeholders.
-
-## Screenshots
-
-| Desktop | Mobile |
-| --- | --- |
-| ![Homepage, desktop](docs/screenshots/home-desktop.png) | ![Homepage, mobile](docs/screenshots/home-mobile.png) |
-| ![Product page, desktop](docs/screenshots/product-desktop.png) | ![Search with no results, mobile](docs/screenshots/noresults-mobile.png) |
+- **XSS:** all output is escaped with Blade's `{{ }}`, including the search term. A Content Security Policy blocks inline and third-party scripts.
+- **Input validation:** search terms are limited to 100 characters, sort must be a known option, and the category must exist.
+- **Hidden products:** inactive products return a 404, the same as missing ones.
+- **Security headers:** every page sends `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` and `Permissions-Policy`.
+- **Secrets:** they live only in `.env`, which is never committed.
