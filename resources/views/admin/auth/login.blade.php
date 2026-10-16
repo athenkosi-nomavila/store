@@ -4,8 +4,8 @@
 
 @section('content')
     <span class="flex h-12 w-12 items-center justify-center rounded-full bg-brand-50 text-brand-600"><x-icon name="lock" size="22" /></span>
-    <h1 class="mt-5 text-2xl font-bold">Welcome back</h1>
-    <p class="mt-1 text-sm text-zinc-500">Log in to the {{ config('app.name') }} admin. For store administrators only.</p>
+    <h1 class="mt-5 text-2xl font-bold">Admin login</h1>
+    <p class="mt-1 text-sm text-zinc-500">Log in to manage the store. For store administrators only.</p>
 
     <form method="POST" action="{{ route('admin.login') }}" class="mt-6 space-y-4">
         @csrf
