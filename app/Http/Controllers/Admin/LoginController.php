@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\View\View;
+
+class LoginController extends Controller
+{
+    public function create(): View
+    {
+        return view('admin.auth.login');
+    }
+
+    public function register(): View
+    {
+        return view('admin.auth.register');
+    }
+}
