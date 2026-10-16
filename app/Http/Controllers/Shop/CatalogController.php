@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Shop;
 
+use App\Catalog\Catalog;
+use App\Catalog\Category;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductListingRequest;
-use App\Models\Category;
-use App\Models\Product;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
 
 /**
@@ -16,6 +16,8 @@ use Illuminate\View\View;
 class CatalogController extends Controller
 {
     private const PER_PAGE = 12;
+
+    public function __construct(private readonly Catalog $catalog) {}
 
     public function index(ProductListingRequest $request): View
     {
@@ -27,8 +29,10 @@ class CatalogController extends Controller
         return $this->listing($request, mode: 'search');
     }
 
-    public function category(ProductListingRequest $request, Category $category): View
+    public function category(ProductListingRequest $request, string $slug): View
     {
+        $category = $this->catalog->category($slug) ?? abort(404);
+
         return $this->listing($request, mode: 'category', category: $category);
     }
 
@@ -36,17 +40,18 @@ class CatalogController extends Controller
     {
         $query = $request->term();
         $sort = $request->sort();
-        $category ??= $request->validated('category')
-            ? Category::where('slug', $request->validated('category'))->first()
-            : null;
+        $category ??= $this->catalog->category((string) $request->validated('category'));
 
-        $products = Product::active()
-            ->with('category')
-            ->when($category, fn (Builder $q) => $q->whereBelongsTo($category))
-            ->when($query !== '', fn (Builder $q) => $q->search($query))
-            ->sortBy($sort)
-            ->paginate(self::PER_PAGE)
-            ->withQueryString();
+        $results = $this->catalog->find($category, $query, $sort);
+        $page = LengthAwarePaginator::resolveCurrentPage();
+
+        $products = (new LengthAwarePaginator(
+            $results->forPage($page, self::PER_PAGE)->values(),
+            $results->count(),
+            self::PER_PAGE,
+            $page,
+            ['path' => $request->url()],
+        ))->withQueryString();
 
         return view('shop.search', [
             'mode' => $mode,

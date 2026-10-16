@@ -28,13 +28,12 @@
             </form>
         </div>
 
-        @php($currentCategory = request()->route('category'))
         <nav class="container main-nav" aria-label="Main">
             <ul class="nav-list">
                 <li><a href="{{ route('home') }}" @class(['nav-link', 'is-active' => request()->routeIs('home')])>Home</a></li>
                 <li><a href="{{ route('shop.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('shop.index', 'shop.search') && ! request()->filled('category')])>All products</a></li>
                 @foreach ($navCategories as $navCategory)
-                    <li><a href="{{ route('shop.category', $navCategory) }}" @class(['nav-link', 'is-active' => $currentCategory instanceof \App\Models\Category && $currentCategory->is($navCategory)])>{{ $navCategory->name }}</a></li>
+                    <li><a href="{{ route('shop.category', $navCategory) }}" @class(['nav-link', 'is-active' => request()->route('slug') === $navCategory->slug && request()->routeIs('shop.category')])>{{ $navCategory->name }}</a></li>
                 @endforeach
             </ul>
         </nav>

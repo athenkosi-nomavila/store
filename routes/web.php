@@ -9,6 +9,5 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', HomeController::class)->name('home');
 Route::get('/shop', [CatalogController::class, 'index'])->name('shop.index');
 Route::get('/search', [CatalogController::class, 'search'])->name('shop.search');
-Route::get('/category/{category}', [CatalogController::class, 'category'])->name('shop.category');
-Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
-
+Route::get('/category/{slug}', [CatalogController::class, 'category'])->name('shop.category');
+Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');

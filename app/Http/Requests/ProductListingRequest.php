@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Catalog\Catalog;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -35,7 +36,7 @@ class ProductListingRequest extends FormRequest
         return [
             'q' => ['nullable', 'string', 'max:100'],
             'sort' => ['nullable', Rule::in(array_keys(self::SORTS))],
-            'category' => ['nullable', 'string', 'max:120', Rule::exists('categories', 'slug')],
+            'category' => ['nullable', 'string', Rule::in(app(Catalog::class)->categories()->keys())],
             'page' => ['nullable', 'integer', 'min:1'],
         ];
     }
@@ -44,7 +45,7 @@ class ProductListingRequest extends FormRequest
     {
         return [
             'q.max' => 'Search terms can be up to 100 characters.',
-            'category.exists' => 'That category does not exist.',
+            'category.in' => 'That category does not exist.',
         ];
     }
 
