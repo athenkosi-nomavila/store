@@ -40,6 +40,19 @@ class AdminScreensTest extends TestCase
             ->assertDontSee('site-search', false);
     }
 
+    public function test_dashboard_counts_come_from_the_database(): void
+    {
+        $category = Category::factory()->create();
+        Category::factory()->create();
+        Product::factory()->count(2)->for($category)->create(['quantity' => 10]);
+        Product::factory()->for($category)->create(['quantity' => 0]);
+        Product::factory()->for($category)->create(['is_active' => false, 'quantity' => 0]);
+
+        $this->get('/admin')
+            ->assertOk()
+            ->assertViewHas('stats', fn (array $stats) => array_column($stats, 1) === [4, 3, 2, 2]);
+    }
+
     public function test_product_list_includes_hidden_products(): void
     {
         Product::factory()->create(['name' => 'Visible Lamp']);
