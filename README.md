@@ -8,8 +8,9 @@ A small Laravel 11 e-commerce site. This first part is the customer-facing store
 
 - PHP 8.2 or newer with the `mbstring` extension
 - Composer 2
+- Node.js 18 or newer (only to build the Tailwind CSS)
 
-No database and no Node build step are needed. The storefront is plain HTML and CSS, with no JavaScript.
+No database is needed. The pages are styled with [Tailwind CSS](https://tailwindcss.com) and use no JavaScript in the browser.
 
 ## Install and run
 
@@ -19,8 +20,12 @@ cd store
 composer install
 cp .env.example .env
 php artisan key:generate
+npm install
+npm run build
 php artisan serve
 ```
+
+While changing styles, run `npm run dev` in a second terminal instead of `npm run build` so the page updates as you save.
 
 Open http://127.0.0.1:8000.
 
@@ -54,8 +59,8 @@ app/Http/Requests/             ProductListingRequest: validates q, sort, categor
 app/Http/Middleware/           SecurityHeaders: CSP and other browser protections
 resources/views/layouts/       app.blade.php: header with search and category menu, footer
 resources/views/shop/          home, product, search (also used for /shop and categories)
-resources/views/components/    product-card, availability-badge, product-image, icon, logo
-public/css/app.css             All styles; brand colours on :root
+resources/views/components/    product-card, product-grid, availability-badge, product-image, breadcrumb, icon, logo
+resources/css/app.css          Tailwind entry point; brand colours and font in @theme
 public/images/products/        Product images
 tests/                         Feature tests for pages, search and security; unit tests for stock rules
 ```
