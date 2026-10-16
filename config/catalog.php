@@ -1,10 +1,9 @@
 <?php
 
 /*
-| Sample catalogue for the storefront.
-|
-| The storefront reads products and categories from here until the database
-| layer is added. Products are listed newest first. Images live in
+| Sample catalogue loaded into the database by CatalogSeeder
+| (php artisan migrate --seed). The storefront reads from the database,
+| not from this file. Products are listed newest first. Images live in
 | public/images/products. Inactive products are hidden from every page.
 */
 

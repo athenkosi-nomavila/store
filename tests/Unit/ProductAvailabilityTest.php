@@ -2,8 +2,7 @@
 
 namespace Tests\Unit;
 
-use App\Catalog\Category;
-use App\Catalog\Product;
+use App\Models\Product;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -11,12 +10,9 @@ class ProductAvailabilityTest extends TestCase
 {
     private function product(array $overrides = []): Product
     {
-        return new Product(...$overrides + [
-            'slug' => 'thing',
-            'sku' => 'SKU-1',
+        return new Product($overrides + [
             'name' => 'Thing',
-            'category' => new Category('audio', 'Audio'),
-            'price' => 100.0,
+            'price' => 100,
             'quantity' => 10,
         ]);
     }
