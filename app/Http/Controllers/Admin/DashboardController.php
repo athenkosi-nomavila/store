@@ -20,6 +20,11 @@ class DashboardController extends Controller
                 ['Out of stock', Product::where('quantity', 0)->count(), 'alert', 'red'],
                 ['Categories', Category::count(), 'tag', 'amber'],
             ],
+            // Out of stock first, then the lowest stock.
+            'lowStock' => Product::with('category')
+                ->where('quantity', '<=', Product::LOW_STOCK_THRESHOLD)
+                ->orderBy('quantity')->orderBy('name')
+                ->limit(5)->get(),
         ]);
     }
 }

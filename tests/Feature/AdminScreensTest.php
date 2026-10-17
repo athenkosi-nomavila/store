@@ -55,6 +55,25 @@ class AdminScreensTest extends TestCase
             ->assertViewHas('stats', fn (array $stats) => array_column($stats, 1) === [4, 3, 2, 2]);
     }
 
+    public function test_dashboard_lists_low_and_out_of_stock_products(): void
+    {
+        Product::factory()->create(['name' => 'Plenty Mug', 'quantity' => 50]);
+        Product::factory()->create(['name' => 'Last Kettle', 'quantity' => 2]);
+        Product::factory()->create(['name' => 'Gone Lamp', 'quantity' => 0]);
+
+        $this->asAdmin()->get('/admin')
+            ->assertOk()
+            ->assertSeeInOrder(['Needs attention', 'Gone Lamp', 'Last Kettle'])
+            ->assertDontSee('Plenty Mug');
+    }
+
+    public function test_dashboard_says_when_nothing_needs_attention(): void
+    {
+        Product::factory()->create(['quantity' => 50]);
+
+        $this->asAdmin()->get('/admin')->assertOk()->assertSee('Every product is well stocked.');
+    }
+
     public function test_product_list_includes_hidden_products(): void
     {
         Product::factory()->create(['name' => 'Visible Lamp']);
