@@ -1,6 +1,23 @@
 # Store
 
-How to install, configure and run the Store application on your own computer.
+How to install, configure and run the Store application on your own computer. No experience with Laravel is needed: follow the steps in order and copy each command into a terminal.
+
+**Already have PHP 8.2+, Composer, Node.js 18+, Git and MySQL 8+?** These are all the commands, explained step by step below:
+
+```bash
+git clone https://github.com/athenkosi-nomavila/store.git
+cd store
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+# create a MySQL database called "store" (Step 4), put its password in .env, then:
+php artisan migrate --seed
+npm run build
+php artisan serve
+```
+
+For how the app is kept secure, see [SECURITY.md](SECURITY.md).
 
 ## Step 1: Install the tools
 
@@ -131,13 +148,25 @@ npm install
    DB_PASSWORD=choose-a-password
    ```
 
-5. Create the tables, your admin account and the sample products:
+5. **Optional:** choose your own admin login. The admin account is created from these lines in `.env`:
+
+   ```
+   ADMIN_NAME="Store Admin"
+   ADMIN_EMAIL=admin@store.test
+   ADMIN_PASSWORD=password
+   ```
+
+   They are fine for trying the app on your own computer. If the site will be online, change the email and password now (the password needs at least 8 characters). The account is only created in the next step, so changing these lines afterwards does nothing.
+
+6. Create the tables, your admin account and the sample products:
 
    ```bash
    php artisan migrate --seed
    ```
 
-   To wipe the database and start again with the sample products, run `php artisan migrate:fresh --seed`.
+   You should see a line saying `Admin admin@store.test created.` (or your own email).
+
+   To wipe the database and start again with the sample products, run `php artisan migrate:fresh --seed`. This also recreates the admin from `.env`.
 
 The other default settings work on your own computer. These are the settings in `.env` you might want to change later:
 
@@ -148,7 +177,7 @@ The other default settings work on your own computer. These are the settings in 
 | `APP_TIMEZONE` | `Africa/Johannesburg` | The time zone used for dates |
 | `APP_DEBUG` | `true` | Shows detailed error pages. Set it to `false` on a live server |
 | `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | `store`, `store`, empty | The MySQL database the app uses, and the user and password it logs in with |
-| `ADMIN_NAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` | `Store Admin`, `admin@store.test`, `password` (from `.env.example`) | The admin login, created by `php artisan migrate --seed`. Changing them later does not change an existing account |
+| `ADMIN_NAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` | `Store Admin`, `admin@store.test`, `password` | The admin login, created by `php artisan migrate --seed`. Changing them later does not change an existing account |
 
 Keep `.env` private. It contains your secret key, database password and admin password, and Git is already set up to ignore it.
 
@@ -158,7 +187,7 @@ Keep `.env` private. It contains your secret key, database password and admin pa
 npm run build
 ```
 
-Run this again whenever you change the views or `resources/css/app.css`.
+This turns the Tailwind styles into the CSS file the site loads. Run it again whenever you change the views or `resources/css/app.css`.
 
 ## Step 6: Run the application
 
@@ -170,14 +199,28 @@ Open **http://127.0.0.1:8000** in your browser. Leave the terminal open while yo
 
 ### Log in to the admin
 
-Open **http://127.0.0.1:8000/admin** and log in with:
+Open **http://127.0.0.1:8000/admin** and log in with the email and password from `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env`. If you didn't change them, that is:
 
 - Email: `admin@store.test`
 - Password: `password`
 
-This is a simple starter login. Before putting the site online, change `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env` before you run `php artisan migrate --seed`.
+There is one admin account and no sign-up page. Products you add, edit or hide in the admin show up on the shop straight away.
 
 The next time you want to run the site, just open a terminal in the `store` folder and run `php artisan serve`.
+
+### Getting the latest version
+
+To update your copy after new changes are pushed to GitHub, run these from the `store` folder:
+
+```bash
+git pull
+composer install
+npm install
+php artisan migrate
+npm run build
+```
+
+`php artisan migrate` adds any new tables or columns and keeps your existing products.
 
 ### Optional: run the tests
 
@@ -198,6 +241,8 @@ All tests should pass. The tests use a temporary in-memory database, so they nev
 | `SQLSTATE[HY000] [2002] Connection refused` | MySQL isn't running. On Windows, start it from the Services app. On macOS, start it in System Settings > MySQL. On Linux, run `sudo service mysql start`. |
 | `could not find driver` | Your PHP is missing the MySQL extension. Re-run the PHP installer from Step 1. |
 | `No application encryption key has been specified` | Run `php artisan key:generate`. |
+| `No admin created: set ADMIN_EMAIL and ADMIN_PASSWORD` | One of the `ADMIN_` lines in `.env` is empty, or the password is shorter than 8 characters. Fix it, then run `php artisan db:seed`. |
+| The admin login says the email or password is wrong | Use the `ADMIN_EMAIL` and `ADMIN_PASSWORD` that were in `.env` when you ran `php artisan migrate --seed`. To start over with the current values, run `php artisan migrate:fresh --seed` (this also resets the products). |
 | `Vite manifest not found` | Run `npm run build`. |
 | The page shows but has no styling | Run `npm run build`, then refresh the browser with `Ctrl+Shift+R` (`Cmd+Shift+R` on macOS). |
 | `Failed to listen on 127.0.0.1:8000` or `Address already in use` | Something else is using that port. Run `php artisan serve --port=8001` and open http://127.0.0.1:8001. |
