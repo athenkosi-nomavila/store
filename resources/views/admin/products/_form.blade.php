@@ -53,15 +53,19 @@
     <div class="space-y-6">
         <div class="rounded-xl border border-zinc-200 bg-white p-6">
             <h2 class="mb-3 text-sm font-medium">Image</h2>
-            <div class="mb-4 aspect-square overflow-hidden rounded-lg bg-stone-100">
-                @if ($product)
-                    <x-product-image :product="$product" />
-                @else
-                    <div class="flex h-full items-center justify-center text-sm text-zinc-400">No image yet</div>
-                @endif
+            <div id="image-preview" class="mb-4 aspect-square overflow-hidden rounded-lg bg-stone-100">
+                {{-- resources/js/admin.js swaps in the picked file before upload. --}}
+                <img data-preview-image hidden alt="Preview of the chosen image" class="h-full w-full object-cover">
+                <div data-preview-current class="h-full">
+                    @if ($product)
+                        <x-product-image :product="$product" />
+                    @else
+                        <div class="flex h-full items-center justify-center text-sm text-zinc-400">No image yet</div>
+                    @endif
+                </div>
             </div>
             <label for="image" class="sr-only">Upload an image</label>
-            <input id="image" @error('image') aria-invalid="true" @enderror type="file" name="image" accept="image/jpeg,image/png,image/webp" aria-describedby="image-help"
+            <input id="image" @error('image') aria-invalid="true" @enderror type="file" name="image" accept="image/jpeg,image/png,image/webp" data-preview="image-preview" aria-describedby="image-help"
                    class="block w-full text-sm text-zinc-600 file:mr-3 file:h-10 file:rounded-full file:border-0 file:bg-brand-50 file:px-4 file:font-semibold file:text-brand-700 hover:file:bg-brand-50/70">
             <p id="image-help" class="mt-2 text-xs text-zinc-500">JPG, PNG or WebP, up to 2 MB.</p>
         </div>

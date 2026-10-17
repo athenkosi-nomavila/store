@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-    @vite('resources/css/app.css')
+    @vite(['resources/css/app.css', 'resources/js/admin.js'])
 </head>
 {{-- The admin area has its own layout: nothing here is shared with the storefront pages. --}}
 <body class="min-h-screen bg-zinc-100 font-sans text-zinc-900 antialiased lg:flex">
