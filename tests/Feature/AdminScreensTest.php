@@ -89,7 +89,8 @@ class AdminScreensTest extends TestCase
         $this->asAdmin()->get("/admin/products/{$product->id}/edit")
             ->assertOk()
             ->assertSee('value="Orbit Watch"', false)
-            ->assertSee('value="STR-0042"', false);
+            ->assertSee('STR-0042')
+            ->assertDontSee('name="sku"', false);
 
         $this->asAdmin()->get('/admin/products/999/edit')->assertNotFound();
         $this->asAdmin()->get("/admin/products/{$product->slug}/edit")->assertNotFound();

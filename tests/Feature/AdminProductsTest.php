@@ -30,7 +30,6 @@ class AdminProductsTest extends TestCase
     {
         return $overrides + [
             'name' => 'Nova Speaker',
-            'sku' => 'str-0100',
             'category_id' => $this->category->id,
             'price' => '1299.50',
             'quantity' => '7',
@@ -45,7 +44,7 @@ class AdminProductsTest extends TestCase
             ->assertRedirect('/admin/products')
             ->assertSessionHas('status');
 
-        $product = Product::firstWhere('sku', 'STR-0100');
+        $product = Product::firstWhere('name', 'Nova Speaker');
         $this->assertSame('nova-speaker', $product->slug);
         $this->assertSame('1299.50', $product->price);
         $this->assertSame(7, $product->quantity);
@@ -61,24 +60,43 @@ class AdminProductsTest extends TestCase
 
         $this->post('/admin/products', $this->form());
 
-        $this->assertSame('nova-speaker-2', Product::firstWhere('sku', 'STR-0100')->slug);
+        $this->assertSame('nova-speaker-2', Product::firstWhere('name', 'Nova Speaker')->slug);
+    }
+
+    public function test_the_sku_is_the_next_free_number(): void
+    {
+        $this->post('/admin/products', $this->form());
+        $this->assertSame('STR-0001', Product::sole()->sku);
+
+        Product::factory()->create(['sku' => 'STR-0012']);
+        Product::factory()->create(['sku' => 'CUSTOM-99']);
+
+        $this->post('/admin/products', $this->form(['name' => 'Second', 'sku' => 'STR-0999']))->assertSessionHasNoErrors();
+
+        $this->assertSame('STR-0013', Product::firstWhere('name', 'Second')->sku, 'A typed-in SKU is ignored');
+    }
+
+    public function test_the_sku_cannot_be_changed_when_editing(): void
+    {
+        $product = Product::factory()->for($this->category)->create(['sku' => 'STR-0100']);
+
+        $this->put("/admin/products/{$product->id}", $this->form(['sku' => 'STR-0555']))->assertSessionHasNoErrors();
+
+        $this->assertSame('STR-0100', $product->fresh()->sku);
     }
 
     public function test_a_product_can_be_added_hidden(): void
     {
         $this->post('/admin/products', $this->form(['is_active' => '0']));
 
-        $this->assertFalse(Product::firstWhere('sku', 'STR-0100')->is_active);
+        $this->assertFalse(Product::firstWhere('name', 'Nova Speaker')->is_active);
         $this->get('/products/nova-speaker')->assertNotFound();
     }
 
     public function test_the_form_is_validated(): void
     {
-        Product::factory()->create(['sku' => 'STR-0001']);
-
         $cases = [
             'name' => ['name' => ''],
-            'sku' => ['sku' => 'STR-0001'],
             'category_id' => ['category_id' => 999],
             'price' => ['price' => '-1'],
             'quantity' => ['quantity' => '1.5'],
@@ -88,16 +106,15 @@ class AdminProductsTest extends TestCase
             $this->post('/admin/products', $this->form($bad))->assertSessionHasErrors($field);
         }
         $this->post('/admin/products', $this->form(['price' => '9.999']))->assertSessionHasErrors('price');
-        $this->post('/admin/products', $this->form(['sku' => 'bad sku!']))->assertSessionHasErrors('sku');
 
-        $this->assertDatabaseCount('products', 1);
+        $this->assertDatabaseCount('products', 0);
     }
 
     public function test_extra_fields_are_ignored(): void
     {
         $this->post('/admin/products', $this->form(['slug' => 'hijacked', 'image' => null, 'id' => 999]));
 
-        $product = Product::firstWhere('sku', 'STR-0100');
+        $product = Product::firstWhere('name', 'Nova Speaker');
         $this->assertSame('nova-speaker', $product->slug);
         $this->assertNotSame(999, $product->id);
     }
@@ -108,7 +125,7 @@ class AdminProductsTest extends TestCase
             'image' => UploadedFile::fake()->image('../../evil.php.png', 400, 400),
         ]))->assertSessionHasNoErrors();
 
-        $image = Product::firstWhere('sku', 'STR-0100')->image;
+        $image = Product::firstWhere('name', 'Nova Speaker')->image;
         $this->assertMatchesRegularExpression('/^upload-[A-Za-z0-9]{40}\.png$/', $image);
         Storage::disk('product_images')->assertExists($image);
         $this->get('/products/nova-speaker')->assertSee('/images/products/'.$image, false);
@@ -173,7 +190,7 @@ class AdminProductsTest extends TestCase
     public function test_delete_asks_first_then_removes_the_product_and_its_upload(): void
     {
         $this->post('/admin/products', $this->form(['image' => UploadedFile::fake()->image('a.png', 300, 300)]));
-        $product = Product::firstWhere('sku', 'STR-0100');
+        $product = Product::firstWhere('name', 'Nova Speaker');
 
         $this->get("/admin/products/{$product->id}/delete")->assertOk()->assertSee('Yes, delete it');
         $this->assertModelExists($product);
