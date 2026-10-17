@@ -8,3 +8,15 @@
     --color-brand-700: #0B5D57;
     --color-cream: #FAF8F5;
 }
+
+/* Dropdowns: swap the browser's tiny native arrow for a brand chevron.
+   Each select also needs pr-10 so the text never runs under it. */
+@layer base {
+    select:not([multiple]) {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%230F766E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
+        background-position: right 0.75rem center;
+        background-repeat: no-repeat;
+        background-size: 1.25rem;
+    }
+}

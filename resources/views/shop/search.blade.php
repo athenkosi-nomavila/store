@@ -10,7 +10,7 @@
     };
     $formAction = $mode === 'search' ? route('shop.search') : route('shop.index');
     $crumbs = $mode === 'category' ? ['Home' => route('home'), 'Shop' => route('shop.index')] : ['Home' => route('home')];
-    $selectClass = 'h-11 w-full rounded-lg border border-zinc-300 bg-white px-3 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30';
+    $selectClass = 'h-11 w-full rounded-lg border border-zinc-300 bg-white px-3 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30 pr-10';
 @endphp
 
 @section('title', $heading)
