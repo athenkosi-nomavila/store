@@ -7,9 +7,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Validator;
 
 /**
- * Creates the first admin from ADMIN_NAME, ADMIN_EMAIL and ADMIN_PASSWORD in
- * .env, so no login details live in the code. Other admins are then added
- * from the Users page.
+ * Creates the admin from ADMIN_NAME, ADMIN_EMAIL and ADMIN_PASSWORD in .env.
  */
 class AdminSeeder extends Seeder
 {

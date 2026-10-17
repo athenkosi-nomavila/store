@@ -37,7 +37,7 @@
                     @foreach ([
                         ['box', 'Manage products, prices and stock'],
                         ['grid', 'Live numbers on your dashboard'],
-                        ['users', 'Choose who has admin access'],
+                        ['check', 'Only store administrators can log in'],
                     ] as [$icon, $text])
                         <li class="flex items-center gap-3">
                             <span class="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-brand-50"><x-icon :name="$icon" size="18" /></span>

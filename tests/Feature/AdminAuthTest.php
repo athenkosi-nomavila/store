@@ -14,7 +14,7 @@ class AdminAuthTest extends TestCase
 
     public function test_guests_are_sent_to_the_login_page_from_every_admin_page(): void
     {
-        foreach (['/admin', '/admin/products', '/admin/products/create', '/admin/users'] as $url) {
+        foreach (['/admin', '/admin/products', '/admin/products/create'] as $url) {
             $this->get($url)->assertRedirect('/admin/login');
         }
     }
@@ -139,58 +139,13 @@ class AdminAuthTest extends TestCase
         $this->assertDatabaseCount('users', 0);
     }
 
-    public function test_admin_can_add_another_admin(): void
+    public function test_there_is_no_users_page(): void
     {
-        $this->actingAs(User::factory()->admin()->create())
-            ->post('/admin/users', [
-                'name' => 'Sipho',
-                'email' => 'sipho@example.com',
-                'password' => 'correct-horse',
-                'password_confirmation' => 'correct-horse',
-            ])
-            ->assertRedirect()
-            ->assertSessionHasNoErrors();
+        $this->actingAs(User::factory()->admin()->create());
 
-        $sipho = User::firstWhere('email', 'sipho@example.com');
-        $this->assertTrue($sipho->isAdmin());
-        $this->assertTrue(Hash::check('correct-horse', $sipho->password));
-    }
-
-    public function test_adding_an_admin_is_validated(): void
-    {
-        $admin = User::factory()->admin()->create(['email' => 'taken@example.com']);
-        $valid = ['name' => 'Sipho', 'email' => 'sipho@example.com', 'password' => 'correct-horse', 'password_confirmation' => 'correct-horse'];
-
-        $this->actingAs($admin);
-        $this->post('/admin/users', ['email' => 'taken@example.com'] + $valid)->assertSessionHasErrors('email');
-        $this->post('/admin/users', ['email' => 'not-an-email'] + $valid)->assertSessionHasErrors('email');
-        $this->post('/admin/users', ['password' => 'short', 'password_confirmation' => 'short'] + $valid)->assertSessionHasErrors('password');
-        $this->post('/admin/users', ['password_confirmation' => 'different'] + $valid)->assertSessionHasErrors('password');
-        $this->post('/admin/users', ['name' => ''] + $valid)->assertSessionHasErrors('name');
-
-        $this->assertDatabaseCount('users', 1);
-    }
-
-    public function test_guests_and_non_admins_cannot_add_admins(): void
-    {
-        $data = ['name' => 'Eve', 'email' => 'eve@example.com', 'password' => 'correct-horse', 'password_confirmation' => 'correct-horse'];
-
-        $this->post('/admin/users', $data)->assertRedirect('/admin/login');
-        $this->actingAs(User::factory()->create())->post('/admin/users', $data)->assertRedirect('/admin/login');
-
+        $this->get('/admin/users')->assertNotFound();
+        $this->post('/admin/users', ['name' => 'Eve', 'email' => 'eve@example.com'])->assertNotFound();
         $this->assertDatabaseMissing('users', ['email' => 'eve@example.com']);
-    }
-
-    public function test_admin_can_remove_a_user_but_not_themselves(): void
-    {
-        $admin = User::factory()->admin()->create();
-        $other = User::factory()->create();
-
-        $this->actingAs($admin)->delete("/admin/users/{$other->id}")->assertRedirect();
-        $this->assertModelMissing($other);
-
-        $this->delete("/admin/users/{$admin->id}")->assertSessionHasErrors('user');
-        $this->assertModelExists($admin);
     }
 
     public function test_a_removed_admin_loses_access_straight_away(): void

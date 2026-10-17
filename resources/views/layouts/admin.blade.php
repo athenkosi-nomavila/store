@@ -28,7 +28,6 @@
                 @foreach ([
                     ['Dashboard', 'grid', route('admin.dashboard'), request()->routeIs('admin.dashboard')],
                     ['Products', 'box', route('admin.products.index'), request()->routeIs('admin.products.*')],
-                    ['Users', 'users', route('admin.users.index'), request()->routeIs('admin.users.*')],
                 ] as [$label, $icon, $url, $active])
                     <li>
                         <a href="{{ $url }}" @if ($active) aria-current="page" @endif @class([

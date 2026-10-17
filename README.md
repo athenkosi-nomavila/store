@@ -131,14 +131,7 @@ npm install
    DB_PASSWORD=choose-a-password
    ```
 
-5. Still in `.env`, choose the email and password you will use to log in to the admin (the password needs at least 8 characters):
-
-   ```
-   ADMIN_EMAIL=you@example.com
-   ADMIN_PASSWORD=choose-an-admin-password
-   ```
-
-6. Create the tables, your admin account and the sample products:
+5. Create the tables, your admin account and the sample products:
 
    ```bash
    php artisan migrate --seed
@@ -155,7 +148,7 @@ The other default settings work on your own computer. These are the settings in 
 | `APP_TIMEZONE` | `Africa/Johannesburg` | The time zone used for dates |
 | `APP_DEBUG` | `true` | Shows detailed error pages. Set it to `false` on a live server |
 | `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | `store`, `store`, empty | The MySQL database the app uses, and the user and password it logs in with |
-| `ADMIN_NAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` | `Store Admin`, empty, empty | The first admin login, created by `php artisan migrate --seed`. Changing them later does not change an existing account |
+| `ADMIN_NAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` | `Store Admin`, `admin@store.test`, `password` (from `.env.example`) | The admin login, created by `php artisan migrate --seed`. Changing them later does not change an existing account |
 
 Keep `.env` private. It contains your secret key, database password and admin password, and Git is already set up to ignore it.
 
@@ -177,7 +170,12 @@ Open **http://127.0.0.1:8000** in your browser. Leave the terminal open while yo
 
 ### Log in to the admin
 
-Open **http://127.0.0.1:8000/admin** and log in with the `ADMIN_EMAIL` and `ADMIN_PASSWORD` you put in `.env`. To give someone else access, add them on the **Users** page of the admin.
+Open **http://127.0.0.1:8000/admin** and log in with:
+
+- Email: `admin@store.test`
+- Password: `password`
+
+This is a simple starter login. Before putting the site online, change `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env` before you run `php artisan migrate --seed`.
 
 The next time you want to run the site, just open a terminal in the `store` folder and run `php artisan serve`.
 
