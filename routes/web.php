@@ -3,7 +3,6 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
-use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Shop\CatalogController;
 use App\Http\Controllers\Shop\HomeController;
 use App\Http\Controllers\Shop\ProductController;
@@ -36,8 +35,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/products/{product:id}', [AdminProductController::class, 'update'])->whereNumber('product')->name('products.update');
         Route::get('/products/{product:id}/delete', [AdminProductController::class, 'confirmDelete'])->whereNumber('product')->name('products.delete');
         Route::delete('/products/{product:id}', [AdminProductController::class, 'destroy'])->whereNumber('product')->name('products.destroy');
-        Route::get('/users', [UserController::class, 'index'])->name('users.index');
-        Route::post('/users', [UserController::class, 'store'])->name('users.store');
-        Route::delete('/users/{user}', [UserController::class, 'destroy'])->whereNumber('user')->name('users.destroy');
     });
 });

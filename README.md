@@ -177,7 +177,7 @@ Open **http://127.0.0.1:8000** in your browser. Leave the terminal open while yo
 
 ### Log in to the admin
 
-Open **http://127.0.0.1:8000/admin** and log in with the `ADMIN_EMAIL` and `ADMIN_PASSWORD` you put in `.env`. To give someone else access, add them on the **Users** page of the admin.
+Open **http://127.0.0.1:8000/admin** and log in with the `ADMIN_EMAIL` and `ADMIN_PASSWORD` you put in `.env`.
 
 The next time you want to run the site, just open a terminal in the `store` folder and run `php artisan serve`.
 
