@@ -135,6 +135,29 @@ class StorefrontTest extends TestCase
             ->assertSee('0 products found');
     }
 
+    public function test_search_treats_wildcards_as_plain_text(): void
+    {
+        $this->useCatalog([
+            $this->product('Cotton Tee', ['description' => '100% cotton.']),
+            $this->product('Wool Socks', ['description' => '100 pairs sold.']),
+            $this->product('Desk_Lamp'),
+        ]);
+
+        $this->get('/search?q='.urlencode('100%'))
+            ->assertOk()
+            ->assertSee('Cotton Tee')
+            ->assertDontSee('Wool Socks')
+            ->assertSee('1 product found');
+
+        $this->get('/search?q=_')
+            ->assertOk()
+            ->assertSee('Desk_Lamp')
+            ->assertDontSee('Cotton Tee')
+            ->assertDontSee('Wool Socks');
+
+        $this->get('/search?q=!')->assertOk()->assertSee('0 products found');
+    }
+
     public function test_database_changes_show_on_the_storefront(): void
     {
         $this->useCatalog([$this->product('Speaker')]);

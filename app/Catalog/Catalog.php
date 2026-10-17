@@ -67,11 +67,16 @@ class Catalog
      */
     public function find(?Category $category = null, string $term = '', string $sort = 'newest'): Builder
     {
+        // % and _ are LIKE wildcards; escape them (and the escape character)
+        // so a search for "100%" means exactly that. The term is still bound
+        // as a parameter, never written into the SQL.
+        $pattern = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $term).'%';
+
         $query = $this->products()
             ->when($category, fn (Builder $q) => $q->where('category_id', $category->getKey()))
             ->when($term !== '', fn (Builder $q) => $q->where(fn (Builder $q) => $q
-                ->where('name', 'like', "%{$term}%")
-                ->orWhere('description', 'like', "%{$term}%")));
+                ->whereRaw("name like ? escape '!'", [$pattern])
+                ->orWhereRaw("description like ? escape '!'", [$pattern])));
 
         return match ($sort) {
             'price_asc' => $query->orderBy('price')->newest(),
