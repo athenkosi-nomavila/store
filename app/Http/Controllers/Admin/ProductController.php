@@ -17,6 +17,9 @@ class ProductController extends Controller
     /** Uploaded pictures get this prefix, so seeded pictures are never deleted. */
     private const UPLOAD_PREFIX = 'upload-';
 
+    /** Generated SKUs look like STR-0001. */
+    private const SKU_PREFIX = 'STR-';
+
     public function index(): View
     {
         return view('admin.products.index', [
@@ -36,6 +39,7 @@ class ProductController extends Controller
     {
         $product = new Product($request->safe()->except('image'));
         $product->slug = $this->uniqueSlug($product->name);
+        $product->sku = $this->nextSku();
 
         if ($request->hasFile('image')) {
             $product->image = $this->storeImage($request->file('image'));
@@ -56,7 +60,7 @@ class ProductController extends Controller
 
     public function update(ProductRequest $request, Product $product): RedirectResponse
     {
-        // The slug (the product's web address) stays the same, so links keep working.
+        // The slug (the product's web address) and the SKU stay the same, so links and records keep working.
         $product->fill($request->safe()->except('image'));
 
         if ($request->hasFile('image')) {
@@ -113,5 +117,18 @@ class ProductController extends Controller
         }
 
         return $slug;
+    }
+
+    /** One more than the highest STR- number in use. Hand-typed SKUs in other formats are skipped. */
+    private function nextSku(): string
+    {
+        $highest = Product::where('sku', 'like', self::SKU_PREFIX.'%')
+            ->pluck('sku')
+            ->map(fn (string $sku) => substr($sku, strlen(self::SKU_PREFIX)))
+            ->filter(fn (string $number) => ctype_digit($number))
+            ->map(fn (string $number) => (int) $number)
+            ->max() ?? 0;
+
+        return self::SKU_PREFIX.str_pad((string) ($highest + 1), 4, '0', STR_PAD_LEFT);
     }
 }

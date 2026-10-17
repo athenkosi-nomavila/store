@@ -17,8 +17,8 @@
 
         <div class="grid gap-5 sm:grid-cols-2">
             <div>
-                <label for="sku" class="mb-1 block text-sm font-medium">SKU</label>
-                <input id="sku" @error('sku') aria-invalid="true" @enderror name="sku" value="{{ old('sku', $product?->sku) }}" required maxlength="32" placeholder="STR-0001" class="{{ $input }}">
+                <p class="mb-1 block text-sm font-medium">SKU</p>
+                <p class="flex h-11 items-center rounded-lg border border-zinc-200 bg-zinc-50 px-3 {{ $product ? '' : 'text-zinc-500' }}">{{ $product?->sku ?? 'Made when you add the product' }}</p>
             </div>
             <div>
                 <label for="category_id" class="mb-1 block text-sm font-medium">Category</label>

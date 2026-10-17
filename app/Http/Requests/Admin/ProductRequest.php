@@ -17,7 +17,6 @@ class ProductRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'sku' => strtoupper(trim((string) $this->input('sku'))),
             'is_active' => $this->boolean('is_active'),
         ]);
     }
@@ -30,7 +29,6 @@ class ProductRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'max:150'],
-            'sku' => ['required', 'string', 'max:32', 'regex:/^[A-Z0-9-]+$/', Rule::unique('products', 'sku')->ignore($product)],
             'category_id' => ['required', 'integer', Rule::exists('categories', 'id')],
             'price' => ['required', 'numeric', 'decimal:0,2', 'min:0', 'max:99999999.99'],
             'quantity' => ['required', 'integer', 'min:0', 'max:1000000'],
@@ -46,7 +44,6 @@ class ProductRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'sku.regex' => 'The SKU may only use capital letters, numbers and dashes.',
             'image.mimes' => 'The image must be a JPG, PNG or WebP picture.',
             'image.max' => 'The image must be 2 MB or smaller.',
             'image.dimensions' => 'The image must be between 100 and 4000 pixels on each side.',
