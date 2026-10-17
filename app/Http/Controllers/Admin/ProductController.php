@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\ProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -72,6 +73,18 @@ class ProductController extends Controller
         $product->save();
 
         return redirect()->route('admin.products.index')->with('status', "{$product->name} was saved.");
+    }
+
+    /**
+     * Shows or hides a product from the list. The form sends the state it wants
+     * rather than "flip it", so a double submit can't undo itself.
+     */
+    public function updateVisibility(Request $request, Product $product): RedirectResponse
+    {
+        $product->is_active = $request->validate(['is_active' => ['required', 'boolean']])['is_active'];
+        $product->save();
+
+        return back()->with('status', $product->name.($product->is_active ? ' is now showing on the store.' : ' is now hidden from the store.'));
     }
 
     public function confirmDelete(Product $product): View

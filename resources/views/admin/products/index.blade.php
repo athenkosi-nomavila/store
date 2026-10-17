@@ -29,6 +29,7 @@
                         <div class="mt-1"><x-admin.product-status :product="$product" /></div>
                     </div>
                     <div class="flex shrink-0 flex-col gap-1">
+                        <x-admin.visibility-toggle :product="$product" />
                         <a href="{{ route('admin.products.edit', $product) }}" title="Edit"
                            class="flex h-10 w-10 items-center justify-center rounded-full text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
                             <x-icon name="pencil" size="18" /><span class="sr-only">Edit {{ $product->name }}</span>
@@ -75,6 +76,7 @@
                             <td class="px-4 py-3"><x-admin.product-status :product="$product" /></td>
                             <td class="px-4 py-3">
                                 <div class="flex justify-end gap-1">
+                                    <x-admin.visibility-toggle :product="$product" />
                                     <a href="{{ route('admin.products.edit', $product) }}" title="Edit"
                                        class="flex h-10 w-10 items-center justify-center rounded-full text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
                                         <x-icon name="pencil" size="18" /><span class="sr-only">Edit {{ $product->name }}</span>

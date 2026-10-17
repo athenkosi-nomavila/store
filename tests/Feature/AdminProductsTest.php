@@ -215,9 +215,39 @@ class AdminProductsTest extends TestCase
             $this->post('/admin/products', $this->form())->assertRedirect('/admin/login');
             $this->put("/admin/products/{$product->id}", $this->form())->assertRedirect('/admin/login');
             $this->delete("/admin/products/{$product->id}")->assertRedirect('/admin/login');
+            $this->patch("/admin/products/{$product->id}/visibility", ['is_active' => '0'])->assertRedirect('/admin/login');
         }
 
         $this->assertDatabaseCount('products', 1);
         $this->assertModelExists($product);
+        $this->assertTrue($product->fresh()->is_active);
+    }
+
+    public function test_a_product_can_be_hidden_and_shown_from_the_list(): void
+    {
+        $product = Product::factory()->for($this->category)->create(['name' => 'Nova Speaker', 'slug' => 'nova-speaker', 'is_active' => true]);
+
+        $this->get('/admin/products')->assertSee('Hide Nova Speaker');
+
+        $this->from('/admin/products')->patch("/admin/products/{$product->id}/visibility", ['is_active' => '0'])
+            ->assertRedirect('/admin/products')
+            ->assertSessionHas('status', 'Nova Speaker is now hidden from the store.');
+        $this->assertFalse($product->fresh()->is_active);
+        $this->get('/products/nova-speaker')->assertNotFound();
+        $this->get('/admin/products')->assertSee('Show Nova Speaker');
+
+        $this->from('/admin/products')->patch("/admin/products/{$product->id}/visibility", ['is_active' => '1'])
+            ->assertSessionHas('status', 'Nova Speaker is now showing on the store.');
+        $this->assertTrue($product->fresh()->is_active);
+        $this->get('/products/nova-speaker')->assertOk();
+    }
+
+    public function test_the_visibility_change_is_validated(): void
+    {
+        $product = Product::factory()->create(['is_active' => true]);
+
+        $this->patch("/admin/products/{$product->id}/visibility", [])->assertSessionHasErrors('is_active');
+        $this->patch("/admin/products/{$product->id}/visibility", ['is_active' => 'maybe'])->assertSessionHasErrors('is_active');
+        $this->assertTrue($product->fresh()->is_active);
     }
 }
