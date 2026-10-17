@@ -22,7 +22,7 @@
             </div>
             <div>
                 <label for="category_id" class="mb-1 block text-sm font-medium">Category</label>
-                <select id="category_id" @error('category_id') aria-invalid="true" @enderror name="category_id" required class="{{ $input }}">
+                <select id="category_id" @error('category_id') aria-invalid="true" @enderror name="category_id" required class="{{ $input }} pr-10">
                     <option value="">Choose a category</option>
                     @foreach ($categories as $category)
                         <option value="{{ $category->id }}" @selected((string) old('category_id', $product?->category_id) === (string) $category->id)>{{ $category->name }}</option>
