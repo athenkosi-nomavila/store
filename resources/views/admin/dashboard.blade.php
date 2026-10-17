@@ -9,11 +9,11 @@
 @endsection
 
 @section('content')
-    <ul class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <ul class="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         @foreach ($stats as [$label, $value, $icon, $tone])
-            <li class="flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-5">
+            <li class="flex flex-col items-start gap-3 rounded-xl border border-zinc-200 bg-white p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
                 <span @class([
-                    'flex h-12 w-12 shrink-0 items-center justify-center rounded-full',
+                    'flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12',
                     'bg-brand-50 text-brand-600' => $tone === 'brand',
                     'bg-green-50 text-green-700' => $tone === 'green',
                     'bg-red-50 text-red-700' => $tone === 'red',
