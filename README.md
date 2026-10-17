@@ -131,7 +131,14 @@ npm install
    DB_PASSWORD=choose-a-password
    ```
 
-5. Create the tables and load the sample products:
+5. Still in `.env`, choose the email and password you will use to log in to the admin (the password needs at least 8 characters):
+
+   ```
+   ADMIN_EMAIL=you@example.com
+   ADMIN_PASSWORD=choose-an-admin-password
+   ```
+
+6. Create the tables, your admin account and the sample products:
 
    ```bash
    php artisan migrate --seed
@@ -148,8 +155,9 @@ The other default settings work on your own computer. These are the settings in 
 | `APP_TIMEZONE` | `Africa/Johannesburg` | The time zone used for dates |
 | `APP_DEBUG` | `true` | Shows detailed error pages. Set it to `false` on a live server |
 | `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | `store`, `store`, empty | The MySQL database the app uses, and the user and password it logs in with |
+| `ADMIN_NAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` | `Store Admin`, empty, empty | The first admin login, created by `php artisan migrate --seed`. Changing them later does not change an existing account |
 
-Keep `.env` private. It contains your secret key and database password, and Git is already set up to ignore it.
+Keep `.env` private. It contains your secret key, database password and admin password, and Git is already set up to ignore it.
 
 ## Step 5: Build the styles
 
@@ -167,9 +175,9 @@ php artisan serve
 
 Open **http://127.0.0.1:8000** in your browser. Leave the terminal open while you use the site, and press `Ctrl+C` there to stop the server.
 
-### Create the admin account
+### Log in to the admin
 
-Open **http://127.0.0.1:8000/admin/register** and sign up. The first account becomes the store admin and is logged straight in. Anyone who signs up after that has to wait until an admin approves them on the **Users** page of the admin.
+Open **http://127.0.0.1:8000/admin** and log in with the `ADMIN_EMAIL` and `ADMIN_PASSWORD` you put in `.env`. To give someone else access, add them on the **Users** page of the admin.
 
 The next time you want to run the site, just open a terminal in the `store` folder and run `php artisan serve`.
 

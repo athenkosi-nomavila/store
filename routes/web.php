@@ -3,7 +3,6 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
-use App\Http\Controllers\Admin\RegisterController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Shop\CatalogController;
 use App\Http\Controllers\Shop\HomeController;
@@ -19,13 +18,11 @@ Route::get('/products/{slug}', [ProductController::class, 'show'])->name('produc
 
 // Admin area, separate from the storefront.
 Route::prefix('admin')->name('admin.')->group(function () {
-    // Login and sign-up, for visitors who are not logged in. Posting is
-    // rate limited per IP on top of the per-email login limit.
+    // Login, for visitors who are not logged in. Posting is rate limited
+    // per IP on top of the per-email login limit.
     Route::middleware('guest')->group(function () {
         Route::get('/login', [LoginController::class, 'create'])->name('login');
         Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:10,1');
-        Route::get('/register', [RegisterController::class, 'create'])->name('register');
-        Route::post('/register', [RegisterController::class, 'store'])->middleware('throttle:5,1');
     });
 
     // Everything else needs a logged-in, approved admin.
@@ -40,7 +37,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/products/{product:id}/delete', [AdminProductController::class, 'confirmDelete'])->whereNumber('product')->name('products.delete');
         Route::delete('/products/{product:id}', [AdminProductController::class, 'destroy'])->whereNumber('product')->name('products.destroy');
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
-        Route::patch('/users/{user}/approve', [UserController::class, 'approve'])->whereNumber('user')->name('users.approve');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->whereNumber('user')->name('users.destroy');
     });
 });

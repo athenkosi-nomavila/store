@@ -24,7 +24,7 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Log in an approved admin, or fail with a message that does not say
+     * Log in an admin, or fail with a message that does not say
      * whether the email exists.
      *
      * @throws ValidationException
@@ -41,11 +41,11 @@ class LoginRequest extends FormRequest
 
         RateLimiter::clear($this->throttleKey());
 
-        // Right password, but not approved yet: don't keep them logged in.
+        // Right password, but not an admin: don't keep them logged in.
         if (! Auth::user()->isAdmin()) {
             Auth::guard('web')->logout();
 
-            throw ValidationException::withMessages(['email' => 'Your account is waiting for an admin to approve it.']);
+            throw ValidationException::withMessages(['email' => 'This account does not have admin access.']);
         }
     }
 

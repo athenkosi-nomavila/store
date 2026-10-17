@@ -3,80 +3,20 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use Database\Seeders\AdminSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class AdminAuthTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function signUp(array $overrides = []): TestResponse
-    {
-        return $this->post('/admin/register', $overrides + [
-            'name' => 'Thandi',
-            'email' => 'thandi@example.com',
-            'password' => 'correct-horse',
-            'password_confirmation' => 'correct-horse',
-        ]);
-    }
-
     public function test_guests_are_sent_to_the_login_page_from_every_admin_page(): void
     {
         foreach (['/admin', '/admin/products', '/admin/products/create', '/admin/users'] as $url) {
             $this->get($url)->assertRedirect('/admin/login');
         }
-    }
-
-    public function test_the_first_sign_up_becomes_admin_and_is_logged_in(): void
-    {
-        $this->signUp()->assertRedirect('/admin');
-
-        $user = User::firstWhere('email', 'thandi@example.com');
-        $this->assertTrue($user->isAdmin());
-        $this->assertAuthenticatedAs($user);
-    }
-
-    public function test_later_sign_ups_wait_for_approval(): void
-    {
-        User::factory()->admin()->create();
-
-        $this->signUp()->assertRedirect('/admin/login')->assertSessionHas('status');
-
-        $this->assertGuest();
-        $this->assertFalse(User::firstWhere('email', 'thandi@example.com')->isAdmin());
-    }
-
-    public function test_sign_up_cannot_make_itself_admin(): void
-    {
-        User::factory()->admin()->create();
-
-        $this->signUp(['is_admin' => 1]);
-
-        $this->assertFalse(User::firstWhere('email', 'thandi@example.com')->isAdmin());
-    }
-
-    public function test_sign_up_validates_its_input(): void
-    {
-        User::factory()->create(['email' => 'taken@example.com']);
-
-        $this->signUp(['email' => 'taken@example.com'])->assertSessionHasErrors('email');
-        $this->signUp(['email' => 'not-an-email'])->assertSessionHasErrors('email');
-        $this->signUp(['password' => 'short', 'password_confirmation' => 'short'])->assertSessionHasErrors('password');
-        $this->signUp(['password_confirmation' => 'different'])->assertSessionHasErrors('password');
-        $this->signUp(['name' => ''])->assertSessionHasErrors('name');
-
-        $this->assertDatabaseCount('users', 1);
-    }
-
-    public function test_passwords_are_stored_hashed(): void
-    {
-        $this->signUp();
-
-        $hash = User::firstWhere('email', 'thandi@example.com')->password;
-        $this->assertNotSame('correct-horse', $hash);
-        $this->assertTrue(Hash::check('correct-horse', $hash));
     }
 
     public function test_an_admin_can_log_in_and_the_session_is_renewed(): void
@@ -104,7 +44,7 @@ class AdminAuthTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_pending_users_cannot_log_in(): void
+    public function test_non_admin_accounts_cannot_log_in(): void
     {
         $user = User::factory()->create(['password' => 'correct-horse']);
 
@@ -114,7 +54,7 @@ class AdminAuthTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_pending_users_with_a_session_are_turned_away(): void
+    public function test_non_admin_accounts_with_a_session_are_turned_away(): void
     {
         $this->actingAs(User::factory()->create())
             ->get('/admin')
@@ -161,19 +101,84 @@ class AdminAuthTest extends TestCase
             ->assertRedirect('/admin');
     }
 
-    public function test_admin_can_approve_a_pending_user(): void
+    public function test_the_seeder_creates_the_admin_from_env_settings(): void
     {
-        $pending = User::factory()->create(['name' => 'Sipho']);
+        config(['admin.name' => 'Thandi', 'admin.email' => 'Thandi@Example.com', 'admin.password' => 'correct-horse']);
 
+        $this->seed(AdminSeeder::class);
+
+        $admin = User::firstWhere('email', 'thandi@example.com');
+        $this->assertTrue($admin->isAdmin());
+        $this->assertNotSame('correct-horse', $admin->password);
+        $this->assertTrue(Hash::check('correct-horse', $admin->password));
+
+        $this->post('/admin/login', ['email' => 'thandi@example.com', 'password' => 'correct-horse'])->assertRedirect('/admin');
+    }
+
+    public function test_seeding_again_never_resets_the_admin_password(): void
+    {
+        config(['admin.email' => 'thandi@example.com', 'admin.password' => 'correct-horse']);
+        $this->seed(AdminSeeder::class);
+        User::firstWhere('email', 'thandi@example.com')->update(['password' => 'changed-later']);
+
+        config(['admin.password' => 'correct-horse']);
+        $this->seed(AdminSeeder::class);
+
+        $this->assertDatabaseCount('users', 1);
+        $this->assertTrue(Hash::check('changed-later', User::first()->password));
+    }
+
+    public function test_the_seeder_skips_missing_or_weak_settings(): void
+    {
+        config(['admin.email' => null, 'admin.password' => null]);
+        $this->seed(AdminSeeder::class);
+
+        config(['admin.email' => 'thandi@example.com', 'admin.password' => 'short']);
+        $this->seed(AdminSeeder::class);
+
+        $this->assertDatabaseCount('users', 0);
+    }
+
+    public function test_admin_can_add_another_admin(): void
+    {
         $this->actingAs(User::factory()->admin()->create())
-            ->get('/admin/users')
-            ->assertOk()
-            ->assertSee('Sipho')
-            ->assertSee('Waiting for approval');
+            ->post('/admin/users', [
+                'name' => 'Sipho',
+                'email' => 'sipho@example.com',
+                'password' => 'correct-horse',
+                'password_confirmation' => 'correct-horse',
+            ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
 
-        $this->patch("/admin/users/{$pending->id}/approve")->assertRedirect();
+        $sipho = User::firstWhere('email', 'sipho@example.com');
+        $this->assertTrue($sipho->isAdmin());
+        $this->assertTrue(Hash::check('correct-horse', $sipho->password));
+    }
 
-        $this->assertTrue($pending->fresh()->isAdmin());
+    public function test_adding_an_admin_is_validated(): void
+    {
+        $admin = User::factory()->admin()->create(['email' => 'taken@example.com']);
+        $valid = ['name' => 'Sipho', 'email' => 'sipho@example.com', 'password' => 'correct-horse', 'password_confirmation' => 'correct-horse'];
+
+        $this->actingAs($admin);
+        $this->post('/admin/users', ['email' => 'taken@example.com'] + $valid)->assertSessionHasErrors('email');
+        $this->post('/admin/users', ['email' => 'not-an-email'] + $valid)->assertSessionHasErrors('email');
+        $this->post('/admin/users', ['password' => 'short', 'password_confirmation' => 'short'] + $valid)->assertSessionHasErrors('password');
+        $this->post('/admin/users', ['password_confirmation' => 'different'] + $valid)->assertSessionHasErrors('password');
+        $this->post('/admin/users', ['name' => ''] + $valid)->assertSessionHasErrors('name');
+
+        $this->assertDatabaseCount('users', 1);
+    }
+
+    public function test_guests_and_non_admins_cannot_add_admins(): void
+    {
+        $data = ['name' => 'Eve', 'email' => 'eve@example.com', 'password' => 'correct-horse', 'password_confirmation' => 'correct-horse'];
+
+        $this->post('/admin/users', $data)->assertRedirect('/admin/login');
+        $this->actingAs(User::factory()->create())->post('/admin/users', $data)->assertRedirect('/admin/login');
+
+        $this->assertDatabaseMissing('users', ['email' => 'eve@example.com']);
     }
 
     public function test_admin_can_remove_a_user_but_not_themselves(): void
@@ -198,16 +203,6 @@ class AdminAuthTest extends TestCase
         $this->app['auth']->forgetGuards(); // each real request loads the user afresh
 
         $this->get('/admin')->assertRedirect('/admin/login');
-    }
-
-    public function test_pending_users_cannot_approve_anyone(): void
-    {
-        $pending = User::factory()->create();
-        $other = User::factory()->create();
-
-        $this->actingAs($pending)->patch("/admin/users/{$other->id}/approve")->assertRedirect('/admin/login');
-
-        $this->assertFalse($other->fresh()->isAdmin());
     }
 
     public function test_admin_forms_need_a_csrf_token(): void

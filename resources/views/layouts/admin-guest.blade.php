@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     @vite('resources/css/app.css')
 </head>
-{{-- Admin pages for signed-out visitors: login and sign-up. --}}
+{{-- Admin pages for signed-out visitors (the login page). --}}
 <body class="min-h-screen bg-cream font-sans text-zinc-900 antialiased lg:grid lg:grid-cols-2">
     {{-- Brand panel: a full column on large screens, a slim bar on phones. --}}
     <aside class="relative overflow-hidden bg-zinc-900 text-zinc-300">
@@ -37,7 +37,7 @@
                     @foreach ([
                         ['box', 'Manage products, prices and stock'],
                         ['grid', 'Live numbers on your dashboard'],
-                        ['users', 'Approve who gets access'],
+                        ['users', 'Choose who has admin access'],
                     ] as [$icon, $text])
                         <li class="flex items-center gap-3">
                             <span class="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-brand-50"><x-icon :name="$icon" size="18" /></span>
@@ -68,10 +68,6 @@
 
                 @yield('content')
             </div>
-
-            @hasSection('back')
-                <p class="mt-6 text-center text-sm text-zinc-500">@yield('back')</p>
-            @endif
         </div>
     </main>
 </body>
