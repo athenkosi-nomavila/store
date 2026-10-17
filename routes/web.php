@@ -33,6 +33,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/products', [AdminProductController::class, 'store'])->name('products.store');
         Route::get('/products/{product:id}/edit', [AdminProductController::class, 'edit'])->whereNumber('product')->name('products.edit');
         Route::put('/products/{product:id}', [AdminProductController::class, 'update'])->whereNumber('product')->name('products.update');
+        Route::patch('/products/{product:id}/visibility', [AdminProductController::class, 'updateVisibility'])->whereNumber('product')->name('products.visibility');
         Route::get('/products/{product:id}/delete', [AdminProductController::class, 'confirmDelete'])->whereNumber('product')->name('products.delete');
         Route::delete('/products/{product:id}', [AdminProductController::class, 'destroy'])->whereNumber('product')->name('products.destroy');
     });
