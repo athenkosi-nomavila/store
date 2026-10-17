@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Lets only approved administrators through. Runs after `auth`, so the
- * visitor is logged in; a pending account (or one whose access was removed
- * while it was logged in) is logged out and sent back to the login page.
+ * Lets only administrators through. Runs after `auth`, so the visitor is
+ * logged in; an account without admin access is logged out and sent back
+ * to the login page.
  */
 class EnsureUserIsAdmin
 {
@@ -22,7 +22,7 @@ class EnsureUserIsAdmin
             $request->session()->regenerateToken();
 
             return redirect()->route('admin.login')
-                ->withErrors(['email' => 'Your account is waiting for an admin to approve it.']);
+                ->withErrors(['email' => 'This account does not have admin access.']);
         }
 
         return $next($request);

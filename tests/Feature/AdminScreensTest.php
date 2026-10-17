@@ -27,19 +27,11 @@ class AdminScreensTest extends TestCase
             ->assertDontSee('site-search', false);
     }
 
-    public function test_login_and_sign_up_screens_link_to_each_other(): void
+    public function test_there_is_no_sign_up_page(): void
     {
-        $this->get('/admin/login')
-            ->assertSee(route('admin.register'))
-            ->assertDontSee('Back to');
-
-        $this->get('/admin/register')
-            ->assertOk()
-            ->assertSee('Create an account')
-            ->assertSee('name="password_confirmation"', false)
-            ->assertSee('Back to login')
-            ->assertSee(route('admin.login'))
-            ->assertDontSee('site-search', false);
+        $this->get('/admin/login')->assertDontSee('Create an account');
+        $this->get('/admin/register')->assertNotFound();
+        $this->post('/admin/register', ['email' => 'a@example.com'])->assertNotFound();
     }
 
     public function test_dashboard_shows_the_four_stat_cards(): void

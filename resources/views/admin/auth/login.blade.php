@@ -27,8 +27,4 @@
             Log in
         </button>
     </form>
-
-    <p class="mt-6 text-center text-sm text-zinc-500">
-        New here? <a href="{{ route('admin.register') }}" class="font-semibold text-brand-600 hover:text-brand-700">Create an account</a>
-    </p>
 @endsection
