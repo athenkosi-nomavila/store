@@ -14,13 +14,13 @@
     @vite('resources/css/app.css')
 </head>
 {{-- Admin pages for signed-out visitors (the login page). --}}
-<body class="min-h-screen bg-cream font-sans text-zinc-900 antialiased lg:grid lg:grid-cols-2">
-    {{-- Brand panel: a full column on large screens, a slim bar on phones. --}}
-    <aside class="relative overflow-hidden bg-zinc-900 text-zinc-300">
+<body class="flex min-h-dvh flex-col bg-cream font-sans text-zinc-900 antialiased lg:flex-row">
+    {{-- Brand panel: a full-height column on large screens, a slim bar on phones. --}}
+    <aside class="relative overflow-hidden bg-zinc-900 text-zinc-300 lg:w-1/2">
         <div class="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-brand-600/40 blur-3xl" aria-hidden="true"></div>
         <div class="absolute -bottom-40 -right-24 h-96 w-96 rounded-full bg-brand-700/30 blur-3xl" aria-hidden="true"></div>
 
-        <div class="relative flex h-full flex-col px-6 py-4 lg:px-12 lg:py-10">
+        <div class="relative flex flex-col px-6 py-4 lg:min-h-dvh lg:px-12 lg:py-10">
             <x-admin.brand />
 
             <div class="hidden flex-1 flex-col justify-center py-12 lg:flex">
@@ -53,7 +53,8 @@
         </div>
     </aside>
 
-    <main class="flex items-center justify-center px-4 py-10 sm:px-6 lg:py-16">
+    {{-- Fills the rest of the screen so the form sits in the middle. --}}
+    <main class="flex flex-1 items-center justify-center px-4 py-10 sm:px-6 lg:py-16">
         <div class="w-full max-w-md">
             <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-10">
                 @if (session('status'))
