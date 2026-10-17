@@ -15,8 +15,35 @@
             <p class="mt-1 text-sm text-zinc-500">Add your first product to show it on the store.</p>
         </div>
     @else
+        {{-- Phones get a card per product; the table needs more width. --}}
+        <ul class="divide-y divide-zinc-200 rounded-xl border border-zinc-200 bg-white md:hidden">
+            @foreach ($products as $product)
+                <li class="flex gap-3 p-4">
+                    <div class="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-stone-100">
+                        <x-product-image :product="$product" />
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <p class="line-clamp-2 font-semibold leading-snug">{{ $product->name }}</p>
+                        <p class="truncate text-xs text-zinc-500">{{ $product->sku }} · {{ $product->category->name }}</p>
+                        <p class="mt-1 text-sm"><span class="font-semibold tabular-nums">{{ $product->formatted_price }}</span> <span class="text-zinc-500">· Qty {{ $product->quantity }}</span></p>
+                        <div class="mt-1"><x-admin.product-status :product="$product" /></div>
+                    </div>
+                    <div class="flex shrink-0 flex-col gap-1">
+                        <a href="{{ route('admin.products.edit', $product) }}" title="Edit"
+                           class="flex h-10 w-10 items-center justify-center rounded-full text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
+                            <x-icon name="pencil" size="18" /><span class="sr-only">Edit {{ $product->name }}</span>
+                        </a>
+                        <a href="{{ route('admin.products.delete', $product) }}" title="Delete"
+                           class="flex h-10 w-10 items-center justify-center rounded-full text-red-600 hover:bg-red-50">
+                            <x-icon name="trash" size="18" /><span class="sr-only">Delete {{ $product->name }}</span>
+                        </a>
+                    </div>
+                </li>
+            @endforeach
+        </ul>
+
         {{-- relative: keeps the screen-reader-only labels inside the scroll area. --}}
-        <div class="relative overflow-x-auto rounded-xl border border-zinc-200 bg-white">
+        <div class="relative hidden overflow-x-auto rounded-xl border border-zinc-200 bg-white md:block">
             <table class="w-full min-w-[44rem] text-left text-sm">
                 <thead class="border-b border-zinc-200 bg-zinc-50 text-xs uppercase tracking-wider text-zinc-500">
                     <tr>
@@ -45,15 +72,7 @@
                             <td class="px-4 py-3">{{ $product->category->name }}</td>
                             <td class="px-4 py-3 text-right tabular-nums whitespace-nowrap">{{ $product->formatted_price }}</td>
                             <td class="px-4 py-3 text-right tabular-nums">{{ $product->quantity }}</td>
-                            <td class="px-4 py-3">
-                                @if ($product->is_active)
-                                    <x-availability-badge :product="$product" />
-                                @else
-                                    <span class="inline-flex items-center gap-1.5 text-sm font-semibold text-zinc-500">
-                                        <x-icon name="eye-off" size="16" /> Hidden
-                                    </span>
-                                @endif
-                            </td>
+                            <td class="px-4 py-3"><x-admin.product-status :product="$product" /></td>
                             <td class="px-4 py-3">
                                 <div class="flex justify-end gap-1">
                                     <a href="{{ route('admin.products.edit', $product) }}" title="Edit"

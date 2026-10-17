@@ -5,7 +5,7 @@
 @section('content')
     {{-- Promotional banner --}}
     <section class="bg-gradient-to-r from-teal-100 to-stone-100">
-        <div class="mx-auto grid max-w-6xl items-center gap-8 px-4 py-12 sm:px-6 md:min-h-[480px] md:grid-cols-2">
+        <div class="mx-auto grid max-w-6xl items-center gap-6 px-4 py-10 sm:px-6 md:gap-8 md:py-12 md:min-h-[480px] md:grid-cols-2">
             <div>
                 <p class="mb-2 text-xs font-bold uppercase tracking-widest text-brand-600">New season</p>
                 <h1 class="text-4xl font-bold tracking-tight md:text-6xl">Upgrade your everyday</h1>
@@ -13,7 +13,7 @@
                 <a href="{{ route('shop.index') }}" class="inline-flex h-12 items-center rounded-full bg-brand-600 px-7 font-semibold text-white hover:bg-brand-700">Shop now</a>
             </div>
             <img src="{{ asset('images/hero-headphones.jpg') }}" alt="" width="800" height="800"
-                 class="hidden w-full max-w-sm justify-self-center rounded-full shadow-lg md:block">
+                 class="order-first w-40 justify-self-center rounded-full shadow-lg sm:w-56 md:order-none md:w-full md:max-w-sm">
         </div>
     </section>
 

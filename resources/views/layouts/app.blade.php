@@ -6,6 +6,8 @@
     <title>@hasSection('title')@yield('title') · @endif{{ config('app.name') }}</title>
     <meta name="description" content="@yield('description', 'Everyday essentials, thoughtfully chosen.')">
 
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
@@ -67,9 +69,30 @@
     </main>
 
     <footer class="bg-zinc-900 text-sm text-zinc-400">
-        <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-6 sm:px-6">
-            <x-logo class="text-white" />
-            <p>&copy; {{ now()->year }} {{ config('app.name') }}. Prices in South African Rand, VAT included.</p>
+        <div class="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
+            <div class="lg:col-span-2">
+                <x-logo class="text-white" />
+                <p class="mt-2 max-w-xs">Everyday essentials, thoughtfully chosen.</p>
+            </div>
+            <nav aria-label="Footer">
+                <h2 class="mb-3 font-semibold text-white">Shop</h2>
+                <ul class="grid grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-1">
+                    <li><a href="{{ route('shop.index') }}" class="inline-block py-1 hover:text-white">All products</a></li>
+                    @foreach ($navCategories as $navCategory)
+                        <li><a href="{{ route('shop.category', $navCategory) }}" class="inline-block py-1 hover:text-white">{{ $navCategory->name }}</a></li>
+                    @endforeach
+                </ul>
+            </nav>
+            <div>
+                <h2 class="mb-3 font-semibold text-white">Good to know</h2>
+                <ul class="space-y-2">
+                    <li>Prices in South African Rand</li>
+                    <li>VAT included</li>
+                </ul>
+            </div>
+        </div>
+        <div class="border-t border-white/10">
+            <p class="mx-auto max-w-6xl px-4 py-5 sm:px-6">&copy; {{ now()->year }} {{ config('app.name') }}. All rights reserved.</p>
         </div>
     </footer>
 </body>
