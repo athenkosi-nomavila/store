@@ -5,6 +5,22 @@ Each point says what the risk is, what stops it, and where to find it in
 the code. The tests named under each point prove it works; run them all
 with `php artisan test`.
 
+## At a glance
+
+| Risk | What protects the store |
+| --- | --- |
+| SQL injection | Eloquent sends all input as bound values, never as SQL |
+| Cross-site scripting | Blade `{{ }}` escapes every value, plus a strict Content Security Policy |
+| Cross-site request forgery | A `@csrf` token on every form, and logout is POST only |
+| Stolen passwords | Passwords are stored only as bcrypt hashes |
+| Bad form data | A Form Request validates every form, and only validated fields are saved |
+| Harmful uploads | JPG, PNG or WebP only, checked by content, 2 MB max, saved under a random name |
+| Break-ins at the login | Five tries then a lockout, a new session on login, admins only |
+| Admin pages without logging in | `auth` and `admin` middleware on every admin route |
+| Leaked secrets | Secrets live only in `.env`, which is never committed |
+
+The sections below explain each one.
+
 ## 1. SQL injection
 
 **Risk:** someone types SQL into the search box or a web address to read or
